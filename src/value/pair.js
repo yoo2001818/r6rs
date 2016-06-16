@@ -13,6 +13,7 @@ export default class PairValue {
       n ++;
       node = node.cdr;
     }
+    if (node != null) n ++;
     return n;
   }
   forEach(callback, thisArg) {
@@ -54,15 +55,19 @@ export default class PairValue {
     return false;
   }
   filter(callback, thisArg) {
-    let parent = null;
-    let rootNode = parent;
+    let parent, rootNode;
     let node = this;
     let n = 0;
     while (node != null && node.type === PAIR) {
       if (callback.call(thisArg, node.car, n, this)) {
         let o = new PairValue(node.car, null);
-        if (parent) parent.cdr = o;
-        parent = o;
+        if (parent) {
+          parent.cdr = o;
+          parent = o;
+        } else {
+          parent = o;
+          rootNode = o;
+        }
       }
       n ++;
       node = node.cdr;
@@ -72,17 +77,21 @@ export default class PairValue {
         if (parent) parent.cdr = node;
       }
     }
-    return rootNode;
+    return rootNode || new PairValue();
   }
   map(callback, thisArg) {
-    let parent = null;
-    let rootNode = parent;
+    let parent, rootNode;
     let node = this;
     let n = 0;
     while (node != null && node.type === PAIR) {
       let o = new PairValue(callback.call(thisArg, node.car, n, this), null);
-      if (parent) parent.cdr = o;
-      parent = o;
+      if (parent) {
+        parent.cdr = o;
+        parent = o;
+      } else {
+        parent = o;
+        rootNode = o;
+      }
       n ++;
       node = node.cdr;
     }
@@ -92,25 +101,39 @@ export default class PairValue {
     return rootNode;
   }
   concat(target) {
-    let parent = null;
-    let rootNode = parent;
+    let parent, rootNode;
     let node = this;
     while (node != null && node.type === PAIR) {
       let o = new PairValue(node.car, null);
-      if (parent) parent.cdr = o;
-      parent = o;
+      if (parent) {
+        parent.cdr = o;
+        parent = o;
+      } else {
+        parent = o;
+        rootNode = o;
+      }
       node = node.cdr;
     }
     if (node != null) {
       let o = new PairValue(node, null);
-      if (parent) parent.cdr = o;
-      parent = o;
+      if (parent) {
+        parent.cdr = o;
+        parent = o;
+      } else {
+        parent = o;
+        rootNode = o;
+      }
     }
     node = target;
     while (node != null && node.type === PAIR) {
       let o = new PairValue(node.car, null);
-      if (parent) parent.cdr = o;
-      parent = o;
+      if (parent) {
+        parent.cdr = o;
+        parent = o;
+      } else {
+        parent = o;
+        rootNode = o;
+      }
       node = node.cdr;
     }
     if (node != null) {
@@ -122,11 +145,11 @@ export default class PairValue {
     let output = [];
     let node = this;
     while (node != null && node.type === PAIR) {
-      if (node.car) output.push(node.car.inspect());
+      if (node.car != null) output.push(node.car);
       node = node.cdr;
     }
     if (node != null) {
-      output.push(node.cdr.inspect());
+      output.push(node);
     }
     return output;
   }
@@ -134,22 +157,29 @@ export default class PairValue {
     let output = [];
     let node = this;
     while (node != null && node.type === PAIR) {
-      if (node.car) output.push(node.car.inspect());
+      if (node.car != null) {
+        output.push(node.car.inspect ? node.car.inspect() : node.car);
+      }
       node = node.cdr;
     }
     if (node != null) {
       output.push('.');
-      output.push(node.cdr.inspect());
+      output.push(node.inspect ? node.inspect() : node);
     }
     return '(' + output.join(' ') + ')';
   }
   static fromArray(array) {
     let parent = null;
-    let rootNode = parent;
+    let rootNode = null;
     for (let i = 0; i < array.length; ++i) {
       let o = new PairValue(array[i], null);
-      if (parent) parent.cdr = o;
-      parent = o;
+      if (parent) {
+        parent.cdr = o;
+        parent = o;
+      } else {
+        parent = o;
+        rootNode = o;
+      }
     }
     return rootNode;
   }

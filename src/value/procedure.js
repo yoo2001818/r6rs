@@ -15,15 +15,15 @@ export default class ProcedureValue {
     } else {
       // Native functions only have number for args.
       // TODO optional args support for native functions
-      argsText = '';
+      argsText = '(';
       for (let i = 0; i < this.args; ++i) {
         if (i === this.args - 1) {
-          argsText += '_';
+          argsText += '_)';
         } else {
           argsText += '_ ';
         }
       }
     }
-    return '#<procedure ' + name + ' ' + argsText + '>';
+    return '#<procedure ' + this.name + ' ' + argsText + '>';
   }
 }
