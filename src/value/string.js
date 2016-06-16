@@ -6,7 +6,12 @@ export default class StringValue {
     this.value = value;
   }
   inspect() {
-    // TODO Escape \n, \r, etc
-    return '"' + this.value + '"';
+    let value = this.value;
+    value = value.replace(/\\/g, '\\\\');
+    value = value.replace(/\r/g, '\\r');
+    value = value.replace(/\n/g, '\\n');
+    value = value.replace(/\t/g, '\\t');
+    value = value.replace(/"/g, '\\"');
+    return '"' + value + '"';
   }
 }
