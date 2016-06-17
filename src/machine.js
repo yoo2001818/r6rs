@@ -1,23 +1,28 @@
 // A object representing LISP machine.
 
+import PairValue from './value/pair';
+
 export default class Machine {
   constructor() {
     // Scope array - contains the scope variables information.
-    this.scopes = [{}];
+    this.scopes = new PairValue({});
     // That's it for now... I think.
   }
   pushScope() {
-    this.scopes.push({});
+    this.scopes = new PairValue({}, this.scopes);
   }
   popScope() {
-    this.scopes.pop();
+    this.scopes = this.scopes.cdr;
   }
   setVariable(name, value) {
-    this.scopes[this.scopes.length - 1][name] = value;
+    this.scopes.car[name] = value;
   }
   getVariable(name) {
-    for (let i = this.scopes.length - 1; i >= 0; --i) {
-      if (this.scopes[i][name]) return this.scopes[i][name];
+    let node = this.scopes;
+    while (node != null) {
+      console.log(node);
+      if (node.car[name]) return node.car[name];
+      node = node.cdr;
     }
   }
   exec(code) {
