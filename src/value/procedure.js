@@ -1,11 +1,15 @@
 import { PAIR, PROCEDURE } from './value';
 
 export default class ProcedureValue {
-  constructor(name, args, code) {
+  constructor(name, args, code, scope) {
     this.type = PROCEDURE;
     this.name = name;
     this.args = args;
     this.code = code;
+    this.scope = scope;
+  }
+  isNative() {
+    return typeof this.code === 'function';
   }
   inspect() {
     let argsText;
