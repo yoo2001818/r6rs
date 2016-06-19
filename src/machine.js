@@ -1,5 +1,5 @@
 // A object representing LISP machine.
-import { SYMBOL, PROCEDURE, PAIR } from './value';
+import { SYMBOL, PROCEDURE, PAIR } from './value/value';
 
 import PairValue from './value/pair';
 
@@ -23,14 +23,17 @@ export default class Machine {
     this.scopes.car[name] = value;
   }
   getVariable(name) {
-    let node = this.stack;
+    let node = this.stack.car.scope;
     while (node != null) {
-      if (node.car.scope[name]) return node.car.scope[name];
+      console.log('scope', node.car);
+      if (node.car[name]) return node.car[name];
       node = node.cdr;
     }
-    return this.rootParameters[name];
+    if (this.rootParameters[name]) return this.rootParameters[name];
+    throw new Error('Unbound variable: ' + name);
   }
-  createStackEntry(list) {
+  pushStack(list) {
+    console.log('Push stack', list);
     this.stack = new PairValue({
       expression: list
     }, this.stack);
@@ -39,6 +42,7 @@ export default class Machine {
     // Loop until the stack ends...
     while (this.stack != null) {
       let stackData = this.stack.car;
+      console.log(stackData);
       let { expression, procedure, result } = stackData;
       if (expression.type !== PAIR) {
         // If constant values are provided...
@@ -52,7 +56,8 @@ export default class Machine {
         this.stack = this.stack.cdr;
         if (this.stack) {
           // Set the result value of the stack.
-          this.stack.result = runResult;
+          this.stack.car.result = runResult;
+          continue;
         } else {
           // If no entry is available, just return the result.
           return runResult;
@@ -68,11 +73,13 @@ export default class Machine {
           let original = expression.car;
           if (original.type === SYMBOL) {
             procedure = this.getVariable(original.value);
+            stackData.procedure = procedure;
           } else if (original.type === PROCEDURE) {
             procedure = original;
+            stackData.procedure = procedure;
           } else if (original.type === PAIR) {
             // Create new stack entry and run that instead.
-            this.createStackEntry(original);
+            this.pushStack(original);
             continue;
           } else {
             // Raise an exception.
@@ -106,30 +113,21 @@ export default class Machine {
         // stack; parent scope is marked in the procedure.
         // This shouldn't be done if the procedure is not lambda.
         stackData.scope = new PairValue({}, procedure.scope);
-        let scope = stackData.scope;
-        // Check and bind arguments to scope...
-        let argsNode = procedure.args;
-        let expNode = expression.cdr;
-        while (argsNode != null) {
-          // Arguments MUST be a list of symbols or an integer.
-          if (argsNode.type === PAIR) {
-            if (expNode == null) {
-              // Missing arguments - throw an exception!
-              throw new Error('Argument ' + argsNode.car.inspect() +
-                ' is missing');
-            }
-            // Assign the variable to the scope...
-            scope.car[argsNode.car.value] = expNode.car;
-            // Advance to next node.
-            argsNode = argsNode.cdr;
-            expNode = expNode.cdr;
-            // This means everything else is optional arguments.
-            if (argsNode != null && argsNode.type !== PAIR) {
-              scope.car[argsNode.value] = expNode;
-              expNode = null;
-              break;
-            }
-          } else {
+        // Try to resolve the args value. Resolving shouldn't be done if
+        // define-syntax is in use, however it won't be implemented for
+        // long time.
+        stackData.expTrack = expression.cdr;
+        if (procedure.args && procedure.args.type === PAIR) {
+          // Proceed to arguments resolving step.
+          stackData.argsTrack = procedure.args;
+          result = null;
+        } else {
+          stackData.argsTrack = null;
+          stackData.buffer = {};
+          // If a number is given, still, try to match the number.
+          let argsNode = procedure.args;
+          let expNode = expression.cdr;
+          while (argsNode !== 0) {
             if (expNode == null) {
               // Missing arguments - throw an exception!
               // TODO Put actual index
@@ -139,20 +137,53 @@ export default class Machine {
             // It's an integer...
             argsNode --;
             expNode = expNode.cdr;
-            // If expNode has something left at this point, it should throw
-            // an error. However since this lacks optional arguments,
-            // just continue.
-            if (argsNode === 0) break;
+          }
+          // Done!
+        }
+      }
+      if (stackData.argsTrack != null) {
+        if (result != null) {
+          // If the result is present, put the data to the scope.
+          let scope = stackData.scope.car;
+          let argsTrack = stackData.argsTrack;
+          if (stackData.argsList) {
+            let pairArgs = new PairValue(stackData.result, null);
+            if (stackData.argsTrack.type !== PAIR) {
+              scope[argsTrack.value] = pairArgs;
+            } else {
+              stackData.argsTrack.cdr = pairArgs;
+            }
+            stackData.argsTrack = pairArgs;
+          } else {
+            // Normal value; just put it.
+            scope[argsTrack.car.value] = stackData.result;
+            // Advance to next step...
+            if (argsTrack.cdr && argsTrack.cdr.type !== PAIR) {
+              // Start list hell...
+              stackData.argsList = true;
+            }
+            stackData.argsTrack = argsTrack.cdr;
+          }
+          stackData.expTrack = stackData.expTrack.cdr;
+        }
+        if (stackData.argsTrack != null) {
+          if (stackData.expTrack) {
+            // Try to resolve the expression value.
+            this.pushStack(stackData.expTrack.car.value);
+            continue;
+          } else if (!stackData.argsList) {
+            // Data underflow.
+            throw new Error('Argument ' + stackData.argsTrack.car.inspect() +
+              ' is missing');
           }
         }
-        // If expNode is not null at this point, it should throw an exception.
-        // Everything is ready! Let's run it!
-        stackData.buffer = {};
       }
       let runResult = result;
       if (procedure.isNative()) {
         // Native code - Pass current stack data.
         runResult = procedure.code.call(this, stackData);
+        // Increment procedure track ID.
+        stackData.procTrack += 1;
         // True indicates that the executing is over.
         if (runResult === true) {
           result = stackData.result;
@@ -160,7 +191,8 @@ export default class Machine {
           this.stack = this.stack.cdr;
           if (this.stack) {
             // Set the result value of the stack.
-            this.stack.result = result;
+            this.stack.car.result = result;
+            continue;
           } else {
             // If no entry is available, just return the result.
             return result;
@@ -180,7 +212,7 @@ export default class Machine {
           }
           stackData.procTrack = procTrack;
           if (code.type === PAIR) {
-            this.createStackEntry(code);
+            this.pushStack(code);
             continue;
           } else if (code.type === SYMBOL) {
             runResult = this.getVariable(code.value);
@@ -193,7 +225,7 @@ export default class Machine {
           this.stack = this.stack.cdr;
           if (this.stack) {
             // Set the result value of the stack.
-            this.stack.result = runResult;
+            this.stack.car.result = runResult;
           } else {
             // If no entry is available, just return the result.
             return runResult;
@@ -201,6 +233,10 @@ export default class Machine {
         }
       }
     }
+  }
+  evaluate(code) {
+    this.pushStack(code);
+    return this.execute();
   }
   exec(code) {
     if (Array.isArray(code)) {
