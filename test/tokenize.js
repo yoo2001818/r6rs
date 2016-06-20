@@ -2,7 +2,7 @@ import tokenize from '../src/tokenizer';
 import parse from '../src/parser';
 
 console.log(parse(tokenize(`
-(+ 1 2 3) ; Adds 1 to 3
+[+ 1 2 3] ; Adds 1 to 3
 #|
   This is a comment.
   #|
@@ -23,4 +23,5 @@ console.log(parse(tokenize(`
 '(#T #F #t #f)
 '(#\\x65 #\\가 #\\nul)
 '(yes no . cancel)
+'53
 `)));

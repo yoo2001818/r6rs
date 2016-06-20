@@ -17,8 +17,17 @@ export const VECTOR_START = Symbol('vectorStart');
 export const LIST_START = Symbol('listStart');
 export const LIST_END = Symbol('listEnd');
 export const LIST_CON = Symbol('listCon');
+export const ABBERVIATION = Symbol('abberviation');
+
+// Abberiviations.
 export const QUOTE = Symbol('quote');
 export const QUASIQUOTE = Symbol('quasiquote');
+export const UNQUOTE = Symbol('unquote');
+export const UNQUOTE_SPLICING = Symbol('unquote-splicing');
+export const SYNTAX = Symbol('syntax');
+export const QUASISYNTAX = Symbol('quasisyntax');
+export const UNSYNTAX = Symbol('unsyntax');
+export const UNSYNTAX_SPLICING = Symbol('unsyntax-splicing');
 
 // Used for list brackets.
 export const ROUND_BRACKET = Symbol('roundBracket');
@@ -96,8 +105,8 @@ const SYNTAX_TABLE = [
     [/\[/g, () => ({ type: LIST_START, value: SQUARE_BRACKET })],
     [/\)/g, () => ({ type: LIST_END, value: ROUND_BRACKET })],
     [/\]/g, () => ({ type: LIST_END, value: SQUARE_BRACKET })],
-    [/'/g, () => ({ type: QUOTE })],
-    [/`/g, () => ({ type: QUASIQUOTE })],
+    [/'/g, () => ({ type: ABBERVIATION, value: QUOTE })],
+    [/`/g, () => ({ type: ABBERVIATION, value: QUASIQUOTE })],
     [/\.(?=(^|[()\[\]";#\s]))/g, () => ({ type: LIST_CON })],
     [/\s+/g, () => undefined]
     // TODO: Implement , ,@ #' #` #, #,@
