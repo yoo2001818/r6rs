@@ -3,26 +3,26 @@
 // Lexical syntax complying to R6RS specification. (Actual interpreter may not
 // fully implement R6RS.)
 
-const COMMENT = Symbol('comment');
-const COMMENT_IGNORE = Symbol('commentIgnore');
-const COMMENT_BLOCK_START = Symbol('commentBlockStart');
-const COMMENT_BLOCK_END = Symbol('commentBlockEnd');
-const IDENTIFIER = Symbol('identifier');
-const NUMBER = Symbol('number');
-const BOOLEAN = Symbol('boolean');
-const CHARACTER = Symbol('character');
-const STRING = Symbol('string');
-const BYTE_VECTOR_START = Symbol('byteVectorStart');
-const VECTOR_START = Symbol('vectorStart');
-const LIST_START = Symbol('listStart');
-const LIST_END = Symbol('listEnd');
-const LIST_CON = Symbol('listCon');
-const QUOTE = Symbol('quote');
-const QUASIQUOTE = Symbol('quasiquote');
+export const COMMENT = Symbol('comment');
+export const COMMENT_IGNORE = Symbol('commentIgnore');
+export const COMMENT_BLOCK_START = Symbol('commentBlockStart');
+export const COMMENT_BLOCK_END = Symbol('commentBlockEnd');
+export const IDENTIFIER = Symbol('identifier');
+export const NUMBER = Symbol('number');
+export const BOOLEAN = Symbol('boolean');
+export const CHARACTER = Symbol('character');
+export const STRING = Symbol('string');
+export const BYTE_VECTOR_START = Symbol('byteVectorStart');
+export const VECTOR_START = Symbol('vectorStart');
+export const LIST_START = Symbol('listStart');
+export const LIST_END = Symbol('listEnd');
+export const LIST_CON = Symbol('listCon');
+export const QUOTE = Symbol('quote');
+export const QUASIQUOTE = Symbol('quasiquote');
 
 // Used for list brackets.
-const ROUND_BRACKET = Symbol('roundBracket');
-const SQUARE_BRACKET = Symbol('squareBracket');
+export const ROUND_BRACKET = Symbol('roundBracket');
+export const SQUARE_BRACKET = Symbol('squareBracket');
 
 const DEFAULT_STATE = 0;
 const COMMENT_BLOCK_STATE = 1;
