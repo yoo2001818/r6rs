@@ -14,7 +14,13 @@ export default class Machine {
     this.stack = null;
   }
   getVariable(name) {
-    let node = this.stack.car.scope;
+    // Iterate until scope appears...
+    let stackNode = this.stack;
+    while (stackNode != null) {
+      if (stackNode.car.scope) break;
+      stackNode = stackNode.cdr;
+    }
+    let node = stackNode && stackNode.car.scope;
     while (node != null) {
       if (node.car[name]) return node.car[name];
       node = node.cdr;
@@ -100,7 +106,7 @@ export default class Machine {
         // Create stack's own scope. Note that parent scope is not parent
         // stack; parent scope is marked in the procedure.
         // This shouldn't be done if the procedure is not lambda.
-        stackData.scope = new PairValue({}, procedure.scope);
+        stackData.scopeTrack = new PairValue({}, procedure.scope);
         // Try to resolve the args value. Resolving shouldn't be done if
         // define-syntax is in use, however it won't be implemented for
         // long time.
@@ -132,7 +138,7 @@ export default class Machine {
       if (stackData.argsTrack != null) {
         if (result != null) {
           // If the result is present, put the data to the scope.
-          let scope = stackData.scope.car;
+          let scope = stackData.scopeTrack.car;
           let argsTrack = stackData.argsTrack;
           if (stackData.argsList) {
             let pairArgs = new PairValue(stackData.result, null);
@@ -157,13 +163,16 @@ export default class Machine {
         if (stackData.argsTrack != null) {
           if (stackData.expTrack) {
             // Try to resolve the expression value.
-            this.pushStack(stackData.expTrack.car.value);
+            this.pushStack(stackData.expTrack.car);
             continue;
           } else if (!stackData.argsList) {
             // Data underflow.
             throw new Error('Argument ' + stackData.argsTrack.car.inspect() +
               ' is missing');
           }
+        } else {
+          // Finalize scope....
+          stackData.scope = stackData.scopeTrack;
         }
       }
       let runResult = result;
@@ -234,9 +243,11 @@ export default class Machine {
       let node = code;
       let result;
       while (node !== null && node.type === PAIR) {
+        console.log('process', node.car);
         this.pushStack(node.car);
         result = this.execute();
         node = node.cdr;
+        console.log(result);
       }
       // Should we process cdr value too?
       if (node !== null) {
