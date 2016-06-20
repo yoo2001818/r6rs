@@ -6,7 +6,3 @@ export const SYMBOL = Symbol('symbol');
 export const PAIR = Symbol('pair');
 export const VECTOR = Symbol('vector');
 export const PROCEDURE = Symbol('procedure');
-
-export default class Value {
-
-}

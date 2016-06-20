@@ -13,19 +13,9 @@ export default class Machine {
     // in different place.
     this.stack = null;
   }
-  pushScope() {
-    this.scopes = new PairValue({}, this.scopes);
-  }
-  popScope() {
-    this.scopes = this.scopes.cdr;
-  }
-  setVariable(name, value) {
-    this.scopes.car[name] = value;
-  }
   getVariable(name) {
     let node = this.stack.car.scope;
     while (node != null) {
-      console.log('scope', node.car);
       if (node.car[name]) return node.car[name];
       node = node.cdr;
     }
@@ -33,7 +23,6 @@ export default class Machine {
     throw new Error('Unbound variable: ' + name);
   }
   pushStack(list) {
-    console.log('Push stack', list);
     this.stack = new PairValue({
       expression: list
     }, this.stack);
@@ -42,7 +31,6 @@ export default class Machine {
     // Loop until the stack ends...
     while (this.stack != null) {
       let stackData = this.stack.car;
-      console.log(stackData);
       let { expression, procedure, result } = stackData;
       if (expression.type !== PAIR) {
         // If constant values are provided...
@@ -237,21 +225,5 @@ export default class Machine {
   evaluate(code) {
     this.pushStack(code);
     return this.execute();
-  }
-  exec(code) {
-    if (Array.isArray(code)) {
-      // Execute the function...
-      let func = this.exec(code[0]);
-      if (func && func.type === 'procedure') {
-        return func.exec(this, code.slice(1));
-      } else {
-        throw new Error('Wrong data provided');
-      }
-    } else if (code.type === 'procedure' || code.type === 'const') {
-      return code;
-    } else {
-      // Resolve the value from scope
-      return this.getVariable(code);
-    }
   }
 }
