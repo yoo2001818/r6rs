@@ -1,6 +1,6 @@
 import tokenize from '../src/tokenizer';
 
-tokenize(`
+console.log(tokenize(`
 (+ 1 2 3) ; Adds 1 to 3
 #|
   This is a comment.
@@ -21,4 +21,5 @@ tokenize(`
     to go hom\\x65")
 '(#T #F #t #f)
 '(#\\x65 #\\가 #\\nul)
-`);
+'(yes no . cancel)
+`));

@@ -53,7 +53,7 @@ const SYNTAX_TABLE = [
     }],
     // [/[a-zA-Z!$%&*/:<=>?\^_~+\-]/]
     // peculiar identifier is not implemented yet
-    [/([^\s#()[\]'`0-9;"']|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*/g, (_, v) => ({
+    [/([^\s#()[\]'`0-9;"'.]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*/g, (_, v) => ({
       type: IDENTIFIER,
       value: v[0]
     })],
@@ -98,7 +98,7 @@ const SYNTAX_TABLE = [
     [/\]/g, () => ({ type: LIST_END, value: SQUARE_BRACKET })],
     [/'/g, () => ({ type: QUOTE })],
     [/`/g, () => ({ type: QUASIQUOTE })],
-    [/\./g, () => ({ type: LIST_CON })],
+    [/\.(?=(^|[()\[\]";#\s]))/g, () => ({ type: LIST_CON })],
     [/\s+/g, () => undefined]
     // TODO: Implement , ,@ #' #` #, #,@
   ], [ // command block state
@@ -155,5 +155,5 @@ export default function tokenize(code) {
       index = results[results.length - 1][0][0].length + index;
     }
   }
-  console.log(output);
+  return output;
 }
