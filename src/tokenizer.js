@@ -27,6 +27,20 @@ const SQUARE_BRACKET = Symbol('squareBracket');
 const DEFAULT_STATE = 0;
 const COMMENT_BLOCK_STATE = 1;
 
+const CHAR_MAPPING = {
+  nul: '\0',
+  alarm: '\x07',
+  backspace: '\b',
+  tab: '\t',
+  linefeed: '\n',
+  vtab: '\v',
+  page: '\x0c',
+  return: '\r',
+  esc: '\b',
+  space: ' ',
+  delete: '\xff' // Is this right?
+};
+
 const SYNTAX_TABLE = [
   // default state
   [
@@ -39,25 +53,43 @@ const SYNTAX_TABLE = [
     }],
     // [/[a-zA-Z!$%&*/:<=>?\^_~+\-]/]
     // peculiar identifier is not implemented yet
-    [/([^\s#()[\]'`0-9;]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;])*/g, (_, v) => ({
+    [/([^\s#()[\]'`0-9;"']|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*/g, (_, v) => ({
       type: IDENTIFIER,
       value: v[0]
     })],
     [new RegExp('#\\\\(x([0-9a-fA-F]+)|nul|alarm|backspace|tab|linefeed' +
       '|newline|vtab|page|return|esc|space|delete|.)', 'g'
-    ), () => ({
-      type: CHARACTER
+    ), (_, v) => ({
+      type: CHARACTER,
+      value: CHAR_MAPPING[v[1]] || v[1].replace(/x([0-9a-fA-F]+)/g,
+        (match, p1) => String.fromCharCode(parseInt(p1, 16)))
     })],
-    [/"([^\\"]|\\[abtnvfr"\\]|\\\s*\n\s*|\\x([0-9a-fA-F]+))+"/g, () => ({
-      type: STRING
+    [/"(([^\\"]|\\[abtnvfr"\\]|\\\s*\n\s*|\\x([0-9a-fA-F]+))+)"/g, (_, v) => ({
+      type: STRING,
+      value: v[1].replace(/\\n/g, '\n')
+        .replace(/\\\\/g, '\\')
+        .replace(/\\r/g, '\r')
+        .replace(/\\b/g, '\b')
+        .replace(/\\t/g, '\t')
+        .replace(/\\v/g, '\v')
+        .replace(/\\"/g, '\"')
+        .replace(/\\f/g, '\f')
+        // Assume \a (alarm) is \x07
+        .replace(/\\a/g, '\x07')
+        .replace(/\\\s*\n\s*/g, '')
+        .replace(/\\x([0-9a-fA-F]+)/g,
+          (match, p1) => String.fromCharCode(parseInt(p1, 16)))
     })],
     // [/((#[bBoOdDxX])?(#[iIeE])?|(#[iIeE])?(#[bBoOdDxX])?)?(\+|-)?/],
     // Support only decimals for now...
     [/(\+|-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?/g, (_, v) => ({
       type: NUMBER,
-      value: v[0]
+      value: parseFloat(v[0])
     })],
-    [/#(t|T|f|F)/g, () => ({ type: BOOLEAN })],
+    [/#(t|T|f|F)/g, (_, v) => ({
+      type: BOOLEAN,
+      value: v[0] === '#t' || v[0] === '#T'
+    })],
     [/#vu8\(/g, () => ({ type: BYTE_VECTOR_START, value: ROUND_BRACKET })],
     [/#\(/g, () => ({ type: VECTOR_START, value: ROUND_BRACKET })],
     [/\(/g, () => ({ type: LIST_START, value: ROUND_BRACKET })],
