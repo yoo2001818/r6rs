@@ -31,5 +31,6 @@ machine.evaluate(`
 '(#T #F #t #f)
 '(#\\x65 #\\가 #\\nul)
 '(yes no . cancel)
+'()
 '53
 `);

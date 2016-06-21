@@ -3,6 +3,7 @@ import NativeProcedureValue from '../value/nativeProcedure';
 import NativeSyntaxValue from '../value/nativeSyntax';
 import RealValue from '../value/number';
 import BooleanValue from '../value/boolean';
+import PairValue from '../value/pair';
 import { SYMBOL, BOOLEAN } from '../value/value';
 
 export const defineFunc = new NativeSyntaxValue('define', (machine, frame) => {
@@ -17,7 +18,7 @@ export const defineFunc = new NativeSyntaxValue('define', (machine, frame) => {
     break;
   case 1:
     machine.rootParameters[frame.bufferName.value] = frame.result;
-    frame.result = undefined;
+    frame.result = new PairValue();
     return true;
   }
 });
@@ -48,7 +49,7 @@ export const ifFunc = new NativeSyntaxValue('if', (machine, frame) => {
       // Follow alternate!
       if (frame.expTrack.cdr == null) {
         // Unspecified behavior.. What should I do?
-        frame.result = null;
+        frame.result = new BooleanValue(false);
         return true;
       } else {
         machine.jumpStack(frame.expTrack.cdr.car);

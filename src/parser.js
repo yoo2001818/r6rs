@@ -100,7 +100,7 @@ export default function parse(tokens) {
       }
       // Pop the stack, and refer parent stack.
       stack.pop();
-      pushData(stack[stack.length - 1], stackEntry.head);
+      pushData(stack[stack.length - 1], stackEntry.head || new PairValue());
       break;
     case TOKENS.LIST_CON:
       if (stackEntry.con !== 0) {
