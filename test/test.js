@@ -23,12 +23,12 @@ console.log(machine.evaluate(PairValue.fromArray([
     ]),
     new SymbolValue('x')
   ])
-])));
+]), true));
 
 console.log(machine.evaluate(PairValue.fromArray([
   new SymbolValue('a'),
   new StringValue('Hello!')
-])));
+]), true));
 
 // We're lacking S-expression support yet. :P
 /*let code = [

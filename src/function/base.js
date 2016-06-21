@@ -82,7 +82,8 @@ export function ifFunc(stack) {
   case 1:
     if (stack.result.type === BOOLEAN && stack.result.value === true) {
       // Follow consequent!
-      this.pushStack(stack.expTrack.car);
+      this.jumpStack(stack.expTrack.car);
+      return true;
     } else {
       // Follow alternate!
       if (stack.expTrack.cdr == null) {
@@ -90,13 +91,10 @@ export function ifFunc(stack) {
         stack.result = undefined;
         return true;
       } else {
-        this.pushStack(stack.expTrack.cdr.car);
+        this.jumpStack(stack.expTrack.cdr.car);
+        return true;
       }
     }
-    break;
-  case 2:
-    // Done. :P
-    return true;
   }
 }
 

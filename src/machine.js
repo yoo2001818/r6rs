@@ -12,6 +12,7 @@ export default class Machine {
     // Note that this only stores 'execute' stack; scoped variables are stored
     // in different place.
     this.stack = null;
+    this.stackDepth = 0;
   }
   getVariable(name) {
     // Iterate until scope appears...
@@ -28,14 +29,36 @@ export default class Machine {
     if (this.rootParameters[name]) return this.rootParameters[name];
     throw new Error('Unbound variable: ' + name);
   }
-  pushStack(list) {
+  jumpStack(list) {
+    // Performs TCO optimization
+    let stackEntry = this.stack.car;
+    this.popStack();
+    this.pushStack(list, stackEntry);
+    stackEntry.tco = true;
+  }
+  popStack() {
+    this.stack = this.stack.cdr;
+    this.stackDepth --;
+  }
+  pushStack(list, stackEntry) {
+    let scope;
+    if (stackEntry) {
+      scope = stackEntry.scope;
+    } else {
+      scope = this.stack && this.stack.car.scope;
+    }
     this.stack = new PairValue({
-      expression: list
+      expression: list,
+      scope
     }, this.stack);
+    this.stackDepth ++;
   }
   execute() {
     // Loop until the stack ends...
     while (this.stack != null) {
+      if (this.stackDepth >= 65536) {
+        throw new Error('Stack overflow');
+      }
       let stackData = this.stack.car;
       let { expression, procedure, result } = stackData;
       if (expression.type !== PAIR) {
@@ -47,7 +70,7 @@ export default class Machine {
           runResult = expression;
         }
         // Code is complete; Return the value and release stack.
-        this.stack = this.stack.cdr;
+        this.popStack();
         if (this.stack) {
           // Set the result value of the stack.
           this.stack.car.result = runResult;
@@ -182,10 +205,10 @@ export default class Machine {
         // Increment procedure track ID.
         stackData.procTrack += 1;
         // True indicates that the executing is over.
-        if (runResult === true) {
+        if (runResult === true && !stackData.tco) {
           result = stackData.result;
           // Code is complete; Return the value and release stack.
-          this.stack = this.stack.cdr;
+          this.popStack();
           if (this.stack) {
             // Set the result value of the stack.
             this.stack.car.result = result;
@@ -209,8 +232,14 @@ export default class Machine {
           }
           stackData.procTrack = procTrack;
           if (code.type === PAIR) {
-            this.pushStack(code);
-            continue;
+            if (procTrack == null) {
+              // TCO!
+              this.jumpStack(code);
+              continue;
+            } else {
+              this.pushStack(code);
+              continue;
+            }
           } else if (code.type === SYMBOL) {
             runResult = this.getVariable(code.value);
           } else {
@@ -219,7 +248,7 @@ export default class Machine {
         }
         if (procTrack == null) {
           // Code is complete; Return the value and release stack.
-          this.stack = this.stack.cdr;
+          this.popStack();
           if (this.stack) {
             // Set the result value of the stack.
             this.stack.car.result = runResult;
