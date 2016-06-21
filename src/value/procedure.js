@@ -1,7 +1,7 @@
 import { PAIR, PROCEDURE } from './value';
 
 export default class ProcedureValue {
-  constructor(name, args, code, scope) {
+  constructor(name, code, args, scope) {
     this.type = PROCEDURE;
     this.name = name;
     this.args = args;
@@ -11,22 +11,17 @@ export default class ProcedureValue {
   isNative() {
     return typeof this.code === 'function';
   }
+  execute(machine, stack) { // eslint-disable-line no-unused-vars
+    throw new Error('ProcedureValue subclass did not implement execute' +
+      ' function.');
+  }
   inspect() {
     let argsText;
     if (this.args.type === PAIR) {
       // User-defined functions have LISP list as args list
       argsText = this.args.inspect();
     } else {
-      // Native functions only have number for args.
-      // TODO optional args support for native functions
-      argsText = '(';
-      for (let i = 0; i < this.args; ++i) {
-        if (i === this.args - 1) {
-          argsText += '_)';
-        } else {
-          argsText += '_ ';
-        }
-      }
+      argsText = '';
     }
     return '#<procedure ' + this.name + ' ' + argsText + '>';
   }

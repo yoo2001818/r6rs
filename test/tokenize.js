@@ -1,5 +1,5 @@
 import Machine from '../src/machine';
-import ProcedureValue from '../src/value/procedure';
+import { PROCEDURE } from '../src/value/value';
 import tokenize from '../src/tokenizer';
 import parse from '../src/parser';
 import * as base from '../src/function/base';
@@ -7,9 +7,8 @@ import * as base from '../src/function/base';
 let machine = new Machine();
 for (let key in base) {
   let func = base[key];
-  if (typeof func !== 'function') continue;
-  machine.rootParameters[func.variable] = new ProcedureValue(func.variable,
-    0, func, null);
+  if (func.type !== PROCEDURE) continue;
+  machine.rootParameters[func.name] = func;
 }
 
 machine.evaluate(parse(tokenize(`

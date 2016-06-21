@@ -15,18 +15,15 @@ export default class Machine {
     this.stackDepth = 0;
   }
   getVariable(name) {
-    // Iterate until scope appears...
-    let stackNode = this.stack;
-    while (stackNode != null) {
-      if (stackNode.car.scope) break;
-      stackNode = stackNode.cdr;
+    if (this.rootParameters[name] != null) {
+      return this.rootParameters[name];
     }
-    let node = stackNode && stackNode.car.scope;
+    // Iterate until scope appears...
+    let node = this.stack && this.stack.car.scope;
     while (node != null) {
-      if (node.car[name]) return node.car[name];
+      if (node.car[name] != null) return node.car[name];
       node = node.cdr;
     }
-    if (this.rootParameters[name]) return this.rootParameters[name];
     throw new Error('Unbound variable: ' + name);
   }
   jumpStack(list) {
@@ -117,145 +114,22 @@ export default class Machine {
           throw new Error('Procedure expected, got ' + procedure.inspect() +
             'instead');
         }
-        // Set up the procTrack value - native JS code requires an integer,
-        // (or something else, but 0 is the default), and Scheme procedure
-        // requires an procedure (It continues by continuously getting
-        // CDR value of cons)
-        if (procedure.isNative()) {
-          stackData.procTrack = 0;
-        } else {
-          stackData.procTrack = procedure.code;
-        }
-        // Create stack's own scope. Note that parent scope is not parent
-        // stack; parent scope is marked in the procedure.
-        // This shouldn't be done if the procedure is not lambda.
-        stackData.scopeTrack = new PairValue({}, procedure.scope);
-        // Try to resolve the args value. Resolving shouldn't be done if
-        // define-syntax is in use, however it won't be implemented for
-        // long time.
-        stackData.expTrack = expression.cdr;
-        if (procedure.args && procedure.args.type === PAIR) {
-          // Proceed to arguments resolving step.
-          stackData.argsTrack = procedure.args;
-          result = null;
-        } else {
-          stackData.argsTrack = null;
-          stackData.buffer = {};
-          // If a number is given, still, try to match the number.
-          let argsNode = procedure.args;
-          let expNode = expression.cdr;
-          while (argsNode !== 0) {
-            if (expNode == null) {
-              // Missing arguments - throw an exception!
-              // TODO Put actual index
-              throw new Error('Argument ' + argsNode +
-                ' is missing');
-            }
-            // It's an integer...
-            argsNode --;
-            expNode = expNode.cdr;
-          }
-          // Done!
-        }
       }
-      if (stackData.argsTrack != null) {
-        if (result != null) {
-          // If the result is present, put the data to the scope.
-          let scope = stackData.scopeTrack.car;
-          let argsTrack = stackData.argsTrack;
-          if (stackData.argsList) {
-            let pairArgs = new PairValue(stackData.result, null);
-            if (stackData.argsTrack.type !== PAIR) {
-              scope[argsTrack.value] = pairArgs;
-            } else {
-              stackData.argsTrack.cdr = pairArgs;
-            }
-            stackData.argsTrack = pairArgs;
-          } else {
-            // Normal value; just put it.
-            scope[argsTrack.car.value] = stackData.result;
-            // Advance to next step...
-            if (argsTrack.cdr && argsTrack.cdr.type !== PAIR) {
-              // Start list hell...
-              stackData.argsList = true;
-            }
-            stackData.argsTrack = argsTrack.cdr;
-          }
-          stackData.expTrack = stackData.expTrack.cdr;
-        }
-        if (stackData.argsTrack != null) {
-          if (stackData.expTrack) {
-            // Try to resolve the expression value.
-            this.pushStack(stackData.expTrack.car);
-            continue;
-          } else if (!stackData.argsList) {
-            // Data underflow.
-            throw new Error('Argument ' + stackData.argsTrack.car.inspect() +
-              ' is missing');
-          }
+      // We've got the procedure - Let's pass the whole stack frame to
+      // the procedure!
+      let runResult = procedure.execute(this, stackData);
+      // True indicates that the executing is over.
+      if (runResult === true && !stackData.tco) {
+        result = stackData.result;
+        // Code is complete; Return the value and release stack.
+        this.popStack();
+        if (this.stack) {
+          // Set the result value of the stack.
+          this.stack.car.result = result;
+          continue;
         } else {
-          // Finalize scope....
-          stackData.scope = stackData.scopeTrack;
-        }
-      }
-      let runResult = result;
-      if (procedure.isNative()) {
-        // Native code - Pass current stack data.
-        runResult = procedure.code.call(this, stackData);
-        // Increment procedure track ID.
-        stackData.procTrack += 1;
-        // True indicates that the executing is over.
-        if (runResult === true && !stackData.tco) {
-          result = stackData.result;
-          // Code is complete; Return the value and release stack.
-          this.popStack();
-          if (this.stack) {
-            // Set the result value of the stack.
-            this.stack.car.result = result;
-            continue;
-          } else {
-            // If no entry is available, just return the result.
-            return result;
-          }
-        }
-      } else {
-        // Non-native code.
-        let procTrack = stackData.procTrack;
-        if (procTrack != null) {
-          let code;
-          if (procTrack.type === PAIR) {
-            code = procTrack.car;
-            procTrack = procTrack.cdr;
-          } else {
-            code = procTrack;
-            procTrack = null;
-          }
-          stackData.procTrack = procTrack;
-          if (code.type === PAIR) {
-            if (procTrack == null) {
-              // TCO!
-              this.jumpStack(code);
-              continue;
-            } else {
-              this.pushStack(code);
-              continue;
-            }
-          } else if (code.type === SYMBOL) {
-            runResult = this.getVariable(code.value);
-          } else {
-            runResult = code;
-          }
-        }
-        if (procTrack == null) {
-          // Code is complete; Return the value and release stack.
-          this.popStack();
-          if (this.stack) {
-            // Set the result value of the stack.
-            this.stack.car.result = runResult;
-          } else {
-            // If no entry is available, just return the result.
-            return runResult;
-          }
+          // If no entry is available, just return the result.
+          return result;
         }
       }
     }

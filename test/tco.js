@@ -1,5 +1,5 @@
 import Machine from '../src/machine';
-import ProcedureValue from '../src/value/procedure';
+import { PROCEDURE } from '../src/value/value';
 import tokenize from '../src/tokenizer';
 import parse from '../src/parser';
 import * as base from '../src/function/base';
@@ -7,10 +7,11 @@ import * as base from '../src/function/base';
 let machine = new Machine();
 for (let key in base) {
   let func = base[key];
-  if (typeof func !== 'function') continue;
-  machine.rootParameters[func.variable] = new ProcedureValue(func.variable,
-    0, func, null);
+  if (func.type !== PROCEDURE) continue;
+  machine.rootParameters[func.name] = func;
 }
+
+let startTime = Date.now();
 
 machine.evaluate(parse(tokenize(`
 (define addAll (lambda (n s)
@@ -21,3 +22,5 @@ machine.evaluate(parse(tokenize(`
 ))
 (addAll 1000000 0) ;This is too slow for now..
 `)));
+
+console.log('Elapsed time: ' + (Date.now() - startTime));

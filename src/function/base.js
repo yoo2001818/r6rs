@@ -1,137 +1,81 @@
-import ProcedureValue from '../value/procedure';
+import LambdaValue from '../value/lambda';
+import NativeProcedureValue from '../value/nativeProcedure';
+import NativeSyntaxValue from '../value/nativeSyntax';
 import RealValue from '../value/number';
 import BooleanValue from '../value/boolean';
 import { SYMBOL, BOOLEAN } from '../value/value';
 
-export function define(stack) {
-  switch (stack.procTrack) {
+export const defineFunc = new NativeSyntaxValue('define', (machine, frame) => {
+  switch (frame.procTrack) {
   case 0:
-    stack.buffer.name = stack.expression.cdr.car;
-    if (stack.buffer.name.type !== SYMBOL) {
-      throw new Error('Symbol expected, ' + stack.buffer.name.inspect() +
+    frame.bufferName = frame.expTrack.car;
+    if (frame.bufferName.type !== SYMBOL) {
+      throw new Error('Symbol expected, ' + frame.bufferName.inspect() +
         ' received');
     }
-    this.pushStack(stack.expression.cdr.cdr.car);
+    machine.pushStack(frame.expTrack.cdr.car);
     break;
   case 1:
-    this.rootParameters[stack.buffer.name.value] = stack.result;
-    stack.result = undefined;
+    machine.rootParameters[frame.bufferName.value] = frame.result;
+    frame.result = undefined;
     return true;
   }
-}
+});
 
-define.variable = 'define';
-
-export function lambda(stack) {
-  stack.result = new ProcedureValue('_lambda_', stack.expression.cdr.car,
-    stack.expression.cdr.cdr, stack.scope);
+export const lambda = new NativeSyntaxValue('lambda', (machine, frame) => {
+  frame.result = new LambdaValue('_lambda_', frame.expTrack.cdr,
+    frame.expTrack.car, frame.scope);
   return true;
-}
+});
 
-lambda.variable = 'lambda';
-
-export function quote(stack) {
-  stack.result = stack.expTrack.car;
+export const quote = new NativeSyntaxValue('quote', (machine, frame) => {
+  frame.result = frame.expTrack.car;
   return true;
-}
+});
 
-quote.variable = 'quote';
-
-export function add(stack) {
-  if (stack.procTrack === 0) {
-    stack.buffer.sum = 0;
-  } else {
-    // TODO Type check!
-    stack.buffer.sum += stack.result.value;
-  }
-  if (stack.expTrack) {
-    this.pushStack(stack.expTrack.car);
-    stack.expTrack = stack.expTrack.cdr;
-  } else {
-    stack.result = new RealValue(stack.buffer.sum);
-    return true;
-  }
-}
-
-add.variable = '+';
-
-export function subtract(stack) {
-  if (stack.procTrack === 1) {
-    stack.buffer.sum = stack.result.value;
-  } else if (stack.procTrack !== 0) {
-    // TODO Type check!
-    stack.buffer.sum -= stack.result.value;
-  }
-  if (stack.expTrack) {
-    this.pushStack(stack.expTrack.car);
-    stack.expTrack = stack.expTrack.cdr;
-  } else {
-    stack.result = new RealValue(stack.buffer.sum);
-    return true;
-  }
-}
-
-subtract.variable = '-';
-
-export function ifFunc(stack) {
-  switch (stack.procTrack) {
+export const ifFunc = new NativeSyntaxValue('if', (machine, frame) => {
+  switch (frame.procTrack) {
   case 0:
-    this.pushStack(stack.expTrack.car);
-    stack.expTrack = stack.expTrack.cdr;
+    machine.pushStack(frame.expTrack.car);
+    frame.expTrack = frame.expTrack.cdr;
     break;
   case 1:
-    if (stack.result.type === BOOLEAN && stack.result.value === true) {
+    if (frame.result.type === BOOLEAN && frame.result.value === true) {
       // Follow consequent!
-      this.jumpStack(stack.expTrack.car);
+      machine.jumpStack(frame.expTrack.car);
       return true;
     } else {
       // Follow alternate!
-      if (stack.expTrack.cdr == null) {
+      if (frame.expTrack.cdr == null) {
         // Unspecified behavior.. What should I do?
-        stack.result = undefined;
+        frame.result = null;
         return true;
       } else {
-        this.jumpStack(stack.expTrack.cdr.car);
+        machine.jumpStack(frame.expTrack.cdr.car);
         return true;
       }
     }
   }
-}
+});
 
-ifFunc.variable = 'if';
+export const add = new NativeProcedureValue('+', (_, list) => {
+  let sum = 0;
+  list.forEach(v => sum += v.value);
+  return new RealValue(sum);
+});
+
+export const subtract = new NativeProcedureValue('-', (_, list) => {
+  let sum = list.car.value;
+  list.cdr.forEach(v => sum -= v.value);
+  return new RealValue(sum);
+});
 
 // Because I hate WCDMA?
-export function lteFunc(stack) {
-  switch (stack.procTrack) {
-  case 0:
-    this.pushStack(stack.expTrack.car);
-    stack.expTrack = stack.expTrack.cdr;
-    break;
-  case 1:
-    stack.buffer.a = stack.result;
-    this.pushStack(stack.expTrack.car);
-    break;
-  case 2:
-    stack.buffer.b = stack.result;
-    // Done. :P
-    // TODO Type check
-    stack.result =
-      new BooleanValue(stack.buffer.a.value <= stack.buffer.b.value);
-    return true;
-  }
-}
+export const lteFunc = new NativeProcedureValue('<=', (machine, list) => {
+  return new BooleanValue(list.car.value <= list.cdr.car.value);
+});
 
-lteFunc.variable = '<=';
-
-export function display(stack) {
-  if (stack.procTrack === 0) {
-    this.pushStack(stack.expTrack.car);
-  } else {
-    // TODO Display function shouldn't add line break....
-    console.log(stack.result.value);
-    stack.result = undefined;
-    return true;
-  }
-}
-
-display.variable = 'display';
+export const display = new NativeProcedureValue('display', (machine, list) => {
+  console.log(list.car);
+  return null;
+});
