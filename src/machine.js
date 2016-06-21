@@ -3,6 +3,9 @@ import { SYMBOL, PROCEDURE, PAIR } from './value/value';
 
 import PairValue from './value/pair';
 
+import parse from './parser';
+import tokenize from './tokenizer';
+
 export default class Machine {
   constructor() {
     // Stores root parameter information - base library, user defined variables
@@ -138,12 +141,18 @@ export default class Machine {
   // Direct means that the provided code should be treated as single list,
   // thus preventing separation.
   evaluate(code, direct = false) {
-    if (direct || code.type !== PAIR) {
-      this.pushStack(code);
+    let ast;
+    if (typeof code === 'string') {
+      ast = parse(tokenize(code));
+    } else {
+      ast = code;
+    }
+    if (direct || ast.type !== PAIR) {
+      this.pushStack(ast);
       return this.execute();
     } else {
       // Process one by one....
-      let node = code;
+      let node = ast;
       let result;
       while (node !== null && node.type === PAIR) {
         console.log('process', node.car);

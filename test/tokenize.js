@@ -1,7 +1,5 @@
 import Machine from '../src/machine';
 import { PROCEDURE } from '../src/value/value';
-import tokenize from '../src/tokenizer';
-import parse from '../src/parser';
 import * as base from '../src/function/base';
 
 let machine = new Machine();
@@ -11,7 +9,7 @@ for (let key in base) {
   machine.rootParameters[func.name] = func;
 }
 
-machine.evaluate(parse(tokenize(`
+machine.evaluate(`
 [+ 1 2 3] ; Adds 1 to 3
 #|
   This is a comment.
@@ -34,4 +32,4 @@ machine.evaluate(parse(tokenize(`
 '(#\\x65 #\\가 #\\nul)
 '(yes no . cancel)
 '53
-`)));
+`);
