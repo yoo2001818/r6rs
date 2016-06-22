@@ -62,10 +62,12 @@ const SYNTAX_TABLE = [
     }],
     // [/[a-zA-Z!$%&*/:<=>?\^_~+\-]/]
     // peculiar identifier is not implemented yet
-    [/([^\s#()[\]'`0-9;"'.]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*/g, (_, v) => ({
-      type: IDENTIFIER,
-      value: v[0]
-    })],
+    [/([^\s#()[\]'`0-9;"'.]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*|\.\.\./g,
+      (_, v) => ({
+        type: IDENTIFIER,
+        value: v[0]
+      })
+    ],
     [new RegExp('#\\\\(x([0-9a-fA-F]+)|nul|alarm|backspace|tab|linefeed' +
       '|newline|vtab|page|return|esc|space|delete|.)', 'g'
     ), (_, v) => ({

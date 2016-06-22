@@ -19,7 +19,7 @@ const rl = readline.createInterface({
 console.log('tiny-lisp REPL');
 
 function read() {
-  rl.question('> ', (answer) => {
+  rl.question('scm> ', (answer) => {
     try {
       console.log(machine.evaluate(answer));
     } catch (e) {

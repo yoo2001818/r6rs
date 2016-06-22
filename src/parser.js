@@ -48,6 +48,9 @@ function wrapData(entry, data) {
 // Pushes the data into the stack entry. Note that this doesn't push the data
 // into the stack..
 function pushData(entry, data) {
+  if (entry.con === 2) {
+    throw new Error('Finished pair cannot have more values');
+  }
   let wrappedData = wrapData(entry, data);
   if (entry.comment) {
     entry.comment = false;

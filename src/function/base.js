@@ -23,6 +23,13 @@ export const defineFunc = new NativeSyntaxValue('define', (machine, frame) => {
   }
 });
 
+export const defineSyntax = new NativeSyntaxValue('define-syntax',
+  (machine, frame) => {
+    // NOP
+    return true;
+  }
+);
+
 export const lambda = new NativeSyntaxValue('lambda', (machine, frame) => {
   frame.result = new LambdaValue('_lambda_', frame.expTrack.cdr,
     frame.expTrack.car, frame.scope);
