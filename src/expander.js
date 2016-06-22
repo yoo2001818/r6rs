@@ -91,14 +91,14 @@ export default function expand(code, rootScope = {}) {
         }, stack);
         continue;
       } else {
+        code = frame.result;
         if (code.car && code.car.type === SYMBOL) {
           // Traverse scope information, and find the symbol
           let transformer = findScope(frame.scope, code.car.value);
           if (transformer) {
-            transformer.exec(code);
+            code = transformer.exec(frame.result);
           }
         }
-        code = frame.result;
         frame.result = null;
       }
     } else if (code && code.type === SYMBOL) {

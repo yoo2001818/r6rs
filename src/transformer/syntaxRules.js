@@ -1,6 +1,8 @@
 import { SYMBOL, PAIR } from '../value/value';
 import PairValue from '../value/pair';
 
+const LIST_WRAP = Symbol('listWrap');
+
 export default class SyntaxRules {
   constructor(list) {
     this.literals = [];
@@ -21,7 +23,17 @@ export default class SyntaxRules {
     while (patternCur != null && patternCur.type === PAIR) {
       console.log(patternCur.car, patternNext && patternNext.car,
         codeNode && codeNode.car, patternLen, codeLen);
-      if (codeNode == null && patternEllipsis) break;
+      if (codeNode == null && patternEllipsis) {
+        if (patternCur.car.type === SYMBOL &&
+          scope[patternCur.car.value] == null
+        ) {
+          // Create empty value to prevent template error
+          scope[patternCur.car.value] = {
+            type: LIST_WRAP
+          };
+        }
+        break;
+      }
       if (patternCur.car.type === SYMBOL) {
         if (patternCur.car.value === '...') {
           // This should just be skipped, without triggering code change
@@ -56,6 +68,7 @@ export default class SyntaxRules {
               varData.tail = pair;
             } else {
               scope[patternCur.car.value] = {
+                type: LIST_WRAP,
                 head: pair,
                 tail: pair
               };
@@ -66,7 +79,8 @@ export default class SyntaxRules {
         this.checkPattern(patternCur.car, codeNode.car, scope, patternEllipsis);
       } else {
         // Nope
-        throw new Error('Not implemented yet');
+        throw new Error('Pattern datum is not supported yet. Please use ' +
+          'if (or when) in the template for now!');
       }
       codeNode = codeNode.cdr;
       codeLen --;
@@ -89,6 +103,80 @@ export default class SyntaxRules {
     // Check CDR value too
     return true;
   }
+  runTemplate(template, scope) {
+    // This doesn't support (... ...) producing single ellipsis!
+    let outputHead, outputTail;
+    let cur = template;
+    let next = template.cdr;
+    let ellipsis = next && next.car.type === SYMBOL && next.car.value === '...';
+    function pushOutput(data) {
+      let pair = new PairValue(data);
+      if (outputHead) {
+        outputTail.cdr = pair;
+        outputTail = pair;
+      } else {
+        outputHead = outputTail = pair;
+      }
+    }
+    while (cur != null && cur.type === PAIR) {
+      console.log(cur.car, next && next.car);
+      let current = cur.car;
+      if (current.type === PAIR) {
+        if (ellipsis) {
+          // Run template until false comes out. Weird, huh?
+          let output = this.runTemplate(current, scope);
+          while (output !== false) {
+            pushOutput(output);
+            output = this.runTemplate(current, scope);
+          }
+        } else {
+          let output = this.runTemplate(current, scope);
+          if (output === false) return false;
+          pushOutput(output);
+        }
+      } else if (current.type === SYMBOL) {
+        // Ignore ...
+        if (current.value !== '...') {
+          let scopeValue = scope[current.value];
+          if (ellipsis) {
+            if (scopeValue && scopeValue.type === LIST_WRAP) {
+              // Simply loop and copy all the values from the list.
+              while (scopeValue.head != null) {
+                pushOutput(scopeValue.head.car);
+                scopeValue.head = scopeValue.head.cdr;
+              }
+            } else {
+              // What??
+              throw new Error(current.value + ' has unexpected ellipsis');
+            }
+          } else {
+            if (scopeValue) {
+              if (scopeValue.type === LIST_WRAP) {
+                if (scopeValue.head == null) {
+                  // Underflow.
+                  return false;
+                }
+                pushOutput(scopeValue.head.car);
+                scopeValue.head = scopeValue.head.cdr;
+              } else {
+                pushOutput(scopeValue);
+              }
+            } else {
+              pushOutput(current);
+            }
+          }
+        }
+      } else {
+        // Constant value
+        if (ellipsis) throw new Error('Unexpected ellipsis');
+        pushOutput(current);
+      }
+      cur = next;
+      next = next && next.cdr;
+      ellipsis = next && next.car.type === SYMBOL && next.car.value === '...';
+    }
+    return outputHead;
+  }
   exec(code) {
     let node = this.rules;
     while (node != null) {
@@ -96,6 +184,9 @@ export default class SyntaxRules {
       if (this.checkPattern(node.car.car, code, scope)) {
         // Transform the code using template
         console.log(scope);
+        let result = this.runTemplate(node.car.cdr.car, scope);
+        if (result === false) throw new Error('Data underflow');
+        return result;
       }
       node = node.cdr;
     }
