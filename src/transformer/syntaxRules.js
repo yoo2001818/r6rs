@@ -13,17 +13,15 @@ export default class SyntaxRules {
     this.rules = list.cdr.cdr;
   }
   checkPattern(pattern, code, scope, parentEllipsis = false) {
-    let patternLen = pattern.length(false);
-    let codeLen = code.length(false);
+    let patternLen = pattern ? pattern.length(false) : 0;
+    let codeLen = code ? code.length(false) : 0;
     let patternCur = pattern;
     let patternNext = pattern.cdr;
     let patternEllipsis = patternNext && patternNext.car.type === SYMBOL &&
       patternNext.car.value === '...';
     let codeNode = code;
     while (patternCur != null && patternCur.type === PAIR) {
-      console.log(patternCur.car, patternNext && patternNext.car,
-        codeNode && codeNode.car, patternLen, codeLen);
-      if (codeNode == null && patternEllipsis) {
+      if (codeNode == null && (patternEllipsis || parentEllipsis)) {
         if (patternCur.car.type === SYMBOL &&
           scope[patternCur.car.value] == null
         ) {
@@ -32,7 +30,12 @@ export default class SyntaxRules {
             type: LIST_WRAP
           };
         }
-        break;
+        patternCur = patternNext;
+        patternNext = patternNext && patternNext.cdr;
+        patternEllipsis = patternNext && patternNext.car.type === SYMBOL &&
+          patternNext.car.value === '...';
+        patternLen --;
+        continue;
       }
       if (patternCur.car.type === SYMBOL) {
         if (patternCur.car.value === '...') {
@@ -119,7 +122,6 @@ export default class SyntaxRules {
       }
     }
     while (cur != null && cur.type === PAIR) {
-      console.log(cur.car, next && next.car);
       let current = cur.car;
       if (current.type === PAIR) {
         if (ellipsis) {
@@ -175,7 +177,7 @@ export default class SyntaxRules {
       next = next && next.cdr;
       ellipsis = next && next.car.type === SYMBOL && next.car.value === '...';
     }
-    return outputHead;
+    return outputHead || new PairValue();
   }
   exec(code) {
     let node = this.rules;
@@ -183,7 +185,6 @@ export default class SyntaxRules {
       let scope = {};
       if (this.checkPattern(node.car.car, code, scope)) {
         // Transform the code using template
-        console.log(scope);
         let result = this.runTemplate(node.car.cdr.car, scope);
         if (result === false) throw new Error('Data underflow');
         return result;

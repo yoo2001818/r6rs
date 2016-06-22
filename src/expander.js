@@ -38,7 +38,6 @@ const basicKeywords = {
       throw new Error('Unsupported transformer type');
     }
     let transObj = transFunc(transCode);
-    console.log(transObj);
     // Apply the transform object to root scope
     rootScope[name.value] = transObj;
     // Don't process child nodes
@@ -104,7 +103,6 @@ export default function expand(code, rootScope = {}) {
     } else if (code && code.type === SYMBOL) {
       // Is symbol itself subject to transformation? I suppose not.
     }
-    console.log(code);
     // Copy current node to the output.
     if (frame.code.type === PAIR) {
       let newPair = new PairValue(code, null);
