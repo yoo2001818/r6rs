@@ -20,7 +20,9 @@ export default class PairValue {
     let n = 0;
     let node = this;
     while (node != null && node.type === PAIR) {
-      callback.call(thisArg, node.car, n, this);
+      if (node.car) {
+        callback.call(thisArg, node.car, n, this);
+      }
       n ++;
       node = node.cdr;
     }
@@ -32,7 +34,9 @@ export default class PairValue {
     let n = 0;
     let node = this;
     while (node != null && node.type === PAIR) {
-      if (!callback.call(thisArg, node.car, n, this)) return false;
+      if (node.car) {
+        if (!callback.call(thisArg, node.car, n, this)) return false;
+      }
       n ++;
       node = node.cdr;
     }
@@ -45,7 +49,9 @@ export default class PairValue {
     let n = 0;
     let node = this;
     while (node != null && node.type === PAIR) {
-      if (callback.call(thisArg, node.car, n, this)) return true;
+      if (node.car) {
+        if (callback.call(thisArg, node.car, n, this)) return true;
+      }
       n ++;
       node = node.cdr;
     }
@@ -59,7 +65,7 @@ export default class PairValue {
     let node = this;
     let n = 0;
     while (node != null && node.type === PAIR) {
-      if (callback.call(thisArg, node.car, n, this)) {
+      if (node.car && callback.call(thisArg, node.car, n, this)) {
         let o = new PairValue(node.car, null);
         if (parent) {
           parent.cdr = o;
@@ -84,7 +90,12 @@ export default class PairValue {
     let node = this;
     let n = 0;
     while (node != null && node.type === PAIR) {
-      let o = new PairValue(callback.call(thisArg, node.car, n, this), null);
+      let o;
+      if (node.car == null) {
+        o = new PairValue();
+      } else {
+        o = new PairValue(callback.call(thisArg, node.car, n, this), null);
+      }
       if (parent) {
         parent.cdr = o;
         parent = o;
