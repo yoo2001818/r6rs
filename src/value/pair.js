@@ -6,14 +6,14 @@ export default class PairValue {
     this.car = car;
     this.cdr = cdr;
   }
-  length() {
+  length(cdr = true) {
     let n = 0;
     let node = this;
     while (node != null && node.type === PAIR) {
       n ++;
       node = node.cdr;
     }
-    if (node != null) n ++;
+    if (node != null && cdr) n ++;
     return n;
   }
   forEach(callback, thisArg) {

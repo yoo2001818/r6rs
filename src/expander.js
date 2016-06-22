@@ -1,9 +1,62 @@
-import { SYMBOL, PROCEDURE, PAIR } from './value/value';
+import { SYMBOL, PAIR } from './value/value';
 
 import PairValue from './value/pair';
 
+import SyntaxRules from './transformer/syntaxRules';
+
 // Statically expands the AST using macros... This is equvalent to
 // macro-expansion time (specified in R6RS)
+
+const transformers = {
+  'syntax-rules': code => new SyntaxRules(code)
+};
+
+const basicKeywords = {
+  'lambda': (frame, code, stack) => {
+    // Create new scope and stack
+    return new PairValue({
+      code,
+      scope: new PairValue({}, frame.scope)
+    }, stack);
+  },
+  'define-syntax': (frame, code, stack, rootScope) => {
+    // Create the transformer object
+    let name = code.cdr.car;
+    if (!name || name.type !== SYMBOL) {
+      throw new Error('define-syntax expects a symbol');
+    }
+    if (rootScope[name.value]) {
+      throw new Error('Syntax ' + name.value + ' conflicts');
+    }
+    let transCode = code.cdr.cdr.car;
+    let transName = transCode.car;
+    if (!transName || transName.type !== SYMBOL) {
+      throw new Error('Transformer name must be a symbol');
+    }
+    let transFunc = transformers[transName.value];
+    if (!transFunc) {
+      throw new Error('Unsupported transformer type');
+    }
+    let transObj = transFunc(transCode);
+    console.log(transObj);
+    // Apply the transform object to root scope
+    rootScope[name.value] = transObj;
+    // Don't process child nodes
+    frame.result = code;
+    return stack;
+  }
+};
+
+function findScope(scope, name) {
+  let scopeNode = scope;
+  while (scopeNode != null) {
+    if (scopeNode.car[name]) {
+      // Found it!
+      return scopeNode.car[name];
+    }
+    scopeNode = scopeNode.cdr;
+  }
+}
 
 // Root scope stores the 'define-syntax' status.
 export default function expand(code, rootScope = {}) {
@@ -24,6 +77,13 @@ export default function expand(code, rootScope = {}) {
       // Or, we should check if it creates new scope (lambda), or it defines
       // new syntax. (define-syntax, let-syntax, etc)
       if (frame.result == null) {
+        if (code.car && code.car.type === SYMBOL) {
+          let keywordHandler = basicKeywords[code.car.value];
+          if (keywordHandler) {
+            stack = keywordHandler(frame, code, stack, rootScope);
+            continue;
+          }
+        }
         // Create child stack frame.
         stack = new PairValue({
           code,
@@ -31,9 +91,18 @@ export default function expand(code, rootScope = {}) {
         }, stack);
         continue;
       } else {
+        if (code.car && code.car.type === SYMBOL) {
+          // Traverse scope information, and find the symbol
+          let transformer = findScope(frame.scope, code.car.value);
+          if (transformer) {
+            transformer.exec(code);
+          }
+        }
         code = frame.result;
         frame.result = null;
       }
+    } else if (code && code.type === SYMBOL) {
+      // Is symbol itself subject to transformation? I suppose not.
     }
     console.log(code);
     // Copy current node to the output.

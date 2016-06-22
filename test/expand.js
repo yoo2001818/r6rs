@@ -5,7 +5,9 @@ import expand from '../src/expander';
 console.log(expand(parse(tokenize(`
 (define-syntax let
   (syntax-rules ()
-    ((_ ((var val) ...) exp exp* ...)
-     (let ((var val) ...) exp exp* ...))))
-(let ((test 5) (test2 3)) (display "Hello") (+ test test2))
+    ((let ((name val) ...) body1 body2 ...)
+      ((lambda (name ...) body1 body2 ...) val ...))
+  )
+)
+(let ((test 5) (test2 3)) (display "Hello") (display "World") (+ test test2))
 `))));
