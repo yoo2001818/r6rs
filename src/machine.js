@@ -36,6 +36,10 @@ export default class Machine {
     this.pushStack(list, stackEntry);
     stackEntry.tco = true;
   }
+  clearStack() {
+    this.stack = null;
+    this.stackDepth = 0;
+  }
   popStack() {
     this.stack = this.stack.cdr;
     this.stackDepth --;
@@ -88,6 +92,9 @@ export default class Machine {
           // If value is a procedure (It's not possible...), solve it directly.
           // If value is a list (pair), create new stack entry.
           let original = expression.car;
+          if (original == null) {
+            throw new Error('List expected; got empty pair instead');
+          }
           if (original.type === SYMBOL) {
             procedure = this.getVariable(original.value);
             stackData.procedure = procedure;
@@ -155,11 +162,9 @@ export default class Machine {
       let node = ast;
       let result;
       while (node !== null && node.type === PAIR) {
-        console.log('process', node.car);
         this.pushStack(node.car);
         result = this.execute();
         node = node.cdr;
-        console.log(result);
       }
       // Should we process cdr value too?
       if (node !== null) {

@@ -17,7 +17,7 @@ export default class ProcedureValue {
   }
   inspect() {
     let argsText;
-    if (this.args.type === PAIR) {
+    if (this.args && this.args.type === PAIR) {
       // User-defined functions have LISP list as args list
       argsText = this.args.inspect();
     } else {

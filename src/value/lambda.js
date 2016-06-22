@@ -42,7 +42,7 @@ export default class LambdaValue extends ProcedureValue {
         }
         frame.expTrack = frame.expTrack.cdr;
       }
-      if (frame.argsTrack != null) {
+      if (frame.argsTrack != null && frame.argsTrack.car != null) {
         if (frame.expTrack) {
           // Try to resolve the expression value.
           machine.pushStack(frame.expTrack.car);
