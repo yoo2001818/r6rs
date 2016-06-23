@@ -21,14 +21,14 @@ export default class Machine {
     this.stackDepth = 0;
   }
   getVariable(name) {
-    if (this.rootParameters[name] != null) {
-      return this.rootParameters[name];
-    }
     // Iterate until scope appears...
     let node = this.stack && this.stack.car.scope;
     while (node != null) {
       if (node.car[name] != null) return node.car[name];
       node = node.cdr;
+    }
+    if (this.rootParameters[name] != null) {
+      return this.rootParameters[name];
     }
     throw new Error('Unbound variable: ' + name);
   }
@@ -175,6 +175,18 @@ export default class Machine {
         result = this.execute();
       }
       return result;
+    }
+  }
+  // Loads platform library into the interpreter scope.
+  loadLibrary(list) {
+    for (let entry of list) {
+      if (entry.type === PROCEDURE) {
+        this.rootParameters[entry.name] = entry;
+      } else if (Array.isArray(entry)) {
+        this.loadLibrary(entry);
+      } else if (typeof entry === 'string') {
+        this.evaluate(entry);
+      }
     }
   }
 }

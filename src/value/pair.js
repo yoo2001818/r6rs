@@ -6,6 +6,13 @@ export default class PairValue {
     this.car = car;
     this.cdr = cdr;
   }
+  isList() {
+    let node = this;
+    while (node != null && node.type === PAIR) {
+      node = node.cdr;
+    }
+    return node === null;
+  }
   length(cdr = true) {
     let n = 0;
     let node = this;

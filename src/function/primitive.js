@@ -6,6 +6,10 @@ import BooleanValue from '../value/boolean';
 import PairValue from '../value/pair';
 import { SYMBOL, BOOLEAN, PAIR, CHARACTER } from '../value/value';
 
+import schemeCode from './primitive.scm';
+import pair from './pair';
+import boolean from './boolean';
+
 // Base library - Primitive functions that depend on native calls.
 
 export default [
@@ -95,7 +99,7 @@ export default [
       }
     }
   }),
-  new NativeProcedureValue('begin', (_, list) => {
+  new NativeProcedureValue('begin', list => {
     let result = null;
     let node = list;
     while (node != null) {
@@ -104,39 +108,50 @@ export default [
     }
     return result;
   }),
-  new NativeProcedureValue('symbol?', (_, list) => {
+  new NativeProcedureValue('assert', (list, _, frame) => {
+    let val = list.car;
+    if (val && val.type === BOOLEAN && val.value === false) {
+      // Assert if false
+      throw new Error('Assertion failed: ' + frame.expression.cdr.inspect());
+    }
+    // Return if true
+    return val;
+  }),
+  new NativeProcedureValue('symbol?', list => {
     return list.car && list.car.type === SYMBOL;
   }),
-  new NativeProcedureValue('char?', (_, list) => {
+  new NativeProcedureValue('char?', list => {
     return list.car && list.car.type === CHARACTER;
   }),
-  new NativeProcedureValue('pair?', (_, list) => {
+  new NativeProcedureValue('pair?', list => {
     return list.car && list.car.type === PAIR;
   }),
-  new NativeProcedureValue('null?', (_, list) => {
+  new NativeProcedureValue('null?', list => {
     if (list.car == null) return true;
     if (list.car.type !== PAIR) return false;
     return list.car.car == null && list.car.cdr == null;
   }),
-  new NativeProcedureValue('list?', (_, list) => {
+  new NativeProcedureValue('list?', list => {
     return list.car && list.car.isList();
   }),
-  new NativeProcedureValue('+', (_, list) => {
+  new NativeProcedureValue('+', list => {
     let sum = 0;
     list.forEach(v => sum += v.value);
     return new RealValue(sum);
   }),
-  new NativeProcedureValue('-', (_, list) => {
+  new NativeProcedureValue('-', list => {
     let sum = list.car.value;
     list.cdr.forEach(v => sum -= v.value);
     return new RealValue(sum);
   }),
   // Because I hate WCDMA?
-  new NativeProcedureValue('<=', (machine, list) => {
+  new NativeProcedureValue('<=', list => {
     return new BooleanValue(list.car.value <= list.cdr.car.value);
   }),
-  new NativeProcedureValue('display', (machine, list) => {
+  new NativeProcedureValue('display', list => {
     console.log(list.car);
     return new PairValue();
-  })
+  }),
+  schemeCode,
+  pair, boolean
 ];

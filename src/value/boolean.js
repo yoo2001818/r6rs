@@ -1,6 +1,6 @@
 import { BOOLEAN } from './value';
 
-export default class BooleanValue {
+export class BooleanValue {
   constructor(value) {
     this.type = BOOLEAN;
     this.value = value;
@@ -8,4 +8,12 @@ export default class BooleanValue {
   inspect() {
     return this.value ? '#t' : '#f';
   }
+}
+
+export const TRUE = new BooleanValue(true);
+export const FALSE = new BooleanValue(false);
+
+export default function getValue(value) {
+  if (value) return TRUE;
+  return FALSE;
 }

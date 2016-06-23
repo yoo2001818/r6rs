@@ -36,7 +36,7 @@ export default class NativeProcedureValue extends ProcedureValue {
       }
     }
     // Start executing the code! :P
-    let result = frame.procedure.code(machine, frame.list, frame);
+    let result = frame.procedure.code(frame.list, machine, frame);
     if (result !== undefined) {
       frame.result = result;
       return true;
