@@ -32,4 +32,14 @@
     ((or test1 test2 ...)
      (let ((x test1))
        (if x x (or test2 ...))))))
+
+(define-syntax define
+  (syntax-rules ()
+    ((define var) (define var '()))
+    ((define (var formals ...) body1 body2 ...)
+      (define var (lambda (formals ...) body1 body2 ...)))
+    ((define (var . formal) body1 body2 ...)
+      (define var (lambda formal body1 body2 ...)))
+  )
+)
 ; `;

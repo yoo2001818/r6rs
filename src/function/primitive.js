@@ -82,7 +82,7 @@ export default [
       frame.expTrack = frame.expTrack.cdr;
       break;
     case 1:
-      if (frame.result.type === BOOLEAN && frame.result.value === true) {
+      if (frame.result.type !== BOOLEAN || frame.result.value === true) {
         // Follow consequent!
         machine.jumpStack(frame.expTrack.car);
         return true;

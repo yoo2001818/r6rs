@@ -85,6 +85,7 @@ export default class SyntaxRules {
           }
         }
       } else if (patternCur.car.type === PAIR) {
+        if (codeNode.car.type !== PAIR) return false;
         let result = this.checkPattern(patternCur.car,
           codeNode.car, scope,
           patternEllipsis);
@@ -116,6 +117,34 @@ export default class SyntaxRules {
     return true;
   }
   runTemplate(template, scope, listLoc = {}) {
+    if (template.type !== PAIR) {
+      // This is a special case, where only symbol or constant value can exist.
+      if (template.type === SYMBOL) {
+        let scopeValue = scope[template.value];
+        if (scopeValue) {
+          if (scopeValue.type === LIST_WRAP) {
+            // I think this won't get a list though.
+            if (listLoc[template.value] == null) {
+              listLoc[template.value] = scopeValue.head;
+            }
+            let listValue = listLoc[template.value];
+            if (listValue === false) {
+              // Underflow.
+              return false;
+            }
+            listLoc[template.value] = listValue.cdr || false;
+            return listValue.car;
+          } else {
+            return scopeValue;
+          }
+        } else {
+          return template;
+        }
+      } else {
+        // Just return template if this is a constant value.
+        return template;
+      }
+    }
     // This doesn't support (... ...) producing single ellipsis!
     let outputHead, outputTail;
     let cur = template;

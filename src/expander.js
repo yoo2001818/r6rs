@@ -95,11 +95,17 @@ export default function expand(code, rootScope = {}) {
             break;
           }
         }
-        // Create child stack frame.
-        stack = new PairValue({
-          code,
-          scope: frame.scope
-        }, stack);
+        if (code.type === PAIR) {
+          // Create child stack frame.
+          stack = new PairValue({
+            code,
+            scope: frame.scope
+          }, stack);
+        } else {
+          // If transformer has transformed the code into other types,
+          // we need to handle it like any other normal value.
+          frame.code = new PairValue(code);
+        }
         continue;
       } else {
         code = frame.result;
