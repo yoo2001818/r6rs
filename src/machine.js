@@ -5,12 +5,15 @@ import PairValue from './value/pair';
 
 import parse from './parser';
 import tokenize from './tokenizer';
+import expand from './expander';
 
 export default class Machine {
   constructor() {
     // Stores root parameter information - base library, user defined variables
     // etc.
     this.rootParameters = {};
+    // Root syntax information used by the expander.
+    this.expanderRoot = {};
     // The execute stack. It uses cons (PairValue) to store information.
     // Note that this only stores 'execute' stack; scoped variables are stored
     // in different place.
@@ -107,8 +110,8 @@ export default class Machine {
             continue;
           } else {
             // Raise an exception.
-            throw new Error('Procedure expected, got ' + procedure.inspect() +
-              'instead');
+            throw new Error('Procedure expected, got ' + original.inspect() +
+              ' instead');
           }
         } else {
           // If procedure is calculated, just continue.
@@ -122,7 +125,7 @@ export default class Machine {
           // stuff (such as with-exception-handler), just throw an native
           // exception.
           throw new Error('Procedure expected, got ' + procedure.inspect() +
-            'instead');
+            ' instead');
         }
       }
       // We've got the procedure - Let's pass the whole stack frame to
@@ -150,7 +153,7 @@ export default class Machine {
   evaluate(code, direct = false) {
     let ast;
     if (typeof code === 'string') {
-      ast = parse(tokenize(code));
+      ast = expand(parse(tokenize(code)), this.expanderRoot);
     } else {
       ast = code;
     }

@@ -18,14 +18,23 @@ const rl = readline.createInterface({
 
 console.log('tiny-lisp REPL');
 
-function read() {
-  rl.question('scm> ', (answer) => {
+let backlog = '';
+
+function read(msg = 'scm> ') {
+  rl.question(msg, (answer) => {
     try {
-      console.log(machine.evaluate(answer));
+      console.log(machine.evaluate(backlog + answer));
+      backlog = '';
     } catch (e) {
-      console.log(e.stack);
       // Reset machine stack
       machine.clearStack();
+      if (e.message === 'List is not closed') {
+        backlog += answer + '\n';
+        read('     ');
+        return;
+      }
+      backlog = '';
+      console.log(e.stack);
     }
     read();
   });

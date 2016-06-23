@@ -83,6 +83,18 @@ export default function expand(code, rootScope = {}) {
             continue;
           }
         }
+        // Run transform until no transformer is available.
+        while (code.car && code.car.type === SYMBOL) {
+          // Traverse scope information, and find the symbol
+          let transformer = findScope(frame.scope, code.car.value);
+          if (transformer) {
+            let original = code;
+            code = transformer.exec(original);
+            if (original === code) break;
+          } else {
+            break;
+          }
+        }
         // Create child stack frame.
         stack = new PairValue({
           code,
@@ -91,13 +103,6 @@ export default function expand(code, rootScope = {}) {
         continue;
       } else {
         code = frame.result;
-        if (code.car && code.car.type === SYMBOL) {
-          // Traverse scope information, and find the symbol
-          let transformer = findScope(frame.scope, code.car.value);
-          if (transformer) {
-            code = transformer.exec(frame.result);
-          }
-        }
         frame.result = null;
       }
     } else if (code && code.type === SYMBOL) {

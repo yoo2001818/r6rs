@@ -37,7 +37,13 @@ export default class SyntaxRules {
         patternLen --;
         continue;
       }
-      if (patternCur.car.type === SYMBOL) {
+      if (patternCur.car == null) {
+        // Do absolutely nothing
+        if (codeNode != null && codeNode.car != null) {
+          // Null check fail
+          return false;
+        }
+      } else if (patternCur.car.type === SYMBOL) {
         if (patternCur.car.value === '...') {
           // This should just be skipped, without triggering code change
           patternCur = patternNext;
@@ -79,7 +85,10 @@ export default class SyntaxRules {
           }
         }
       } else if (patternCur.car.type === PAIR) {
-        this.checkPattern(patternCur.car, codeNode.car, scope, patternEllipsis);
+        let result = this.checkPattern(patternCur.car,
+          codeNode.car, scope,
+          patternEllipsis);
+        if (!result) return false;
       } else {
         // Nope
         throw new Error('Pattern datum is not supported yet. Please use ' +
@@ -106,7 +115,7 @@ export default class SyntaxRules {
     // Check CDR value too
     return true;
   }
-  runTemplate(template, scope) {
+  runTemplate(template, scope, listLoc = {}) {
     // This doesn't support (... ...) producing single ellipsis!
     let outputHead, outputTail;
     let cur = template;
@@ -123,16 +132,20 @@ export default class SyntaxRules {
     }
     while (cur != null && cur.type === PAIR) {
       let current = cur.car;
-      if (current.type === PAIR) {
+      if (current == null) {
+        // Null value
+        if (ellipsis) throw new Error('Unexpected ellipsis');
+      } else if (current.type === PAIR) {
         if (ellipsis) {
           // Run template until false comes out. Weird, huh?
-          let output = this.runTemplate(current, scope);
+          let listObj = Object.assign({}, listLoc);
+          let output = this.runTemplate(current, scope, listObj);
           while (output !== false) {
             pushOutput(output);
-            output = this.runTemplate(current, scope);
+            output = this.runTemplate(current, scope, listObj);
           }
         } else {
-          let output = this.runTemplate(current, scope);
+          let output = this.runTemplate(current, scope, listLoc);
           if (output === false) return false;
           pushOutput(output);
         }
@@ -143,9 +156,10 @@ export default class SyntaxRules {
           if (ellipsis) {
             if (scopeValue && scopeValue.type === LIST_WRAP) {
               // Simply loop and copy all the values from the list.
-              while (scopeValue.head != null) {
-                pushOutput(scopeValue.head.car);
-                scopeValue.head = scopeValue.head.cdr;
+              let node = scopeValue.head;
+              while (node != null) {
+                pushOutput(node.car);
+                node = node.cdr;
               }
             } else {
               // What??
@@ -154,12 +168,16 @@ export default class SyntaxRules {
           } else {
             if (scopeValue) {
               if (scopeValue.type === LIST_WRAP) {
-                if (scopeValue.head == null) {
+                if (listLoc[current.value] == null) {
+                  listLoc[current.value] = scopeValue.head;
+                }
+                let listValue = listLoc[current.value];
+                if (listValue === false) {
                   // Underflow.
                   return false;
                 }
-                pushOutput(scopeValue.head.car);
-                scopeValue.head = scopeValue.head.cdr;
+                pushOutput(listValue.car);
+                listLoc[current.value] = listValue.cdr || false;
               } else {
                 pushOutput(scopeValue);
               }

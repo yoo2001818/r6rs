@@ -20,6 +20,6 @@ console.log(machine.evaluate(expand(parse(tokenize(`
       ((lambda (name ...) body1 body2 ...) val ...))
   )
 )
-(let () (display "127.0.0.1"))
+(let () 3)
 (let ((test 5) (test2 3)) (display "Hello") (display "World") (+ test test2))
 `)))));
