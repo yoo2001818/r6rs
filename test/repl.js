@@ -1,12 +1,11 @@
 import Machine from '../src/machine';
 import { PROCEDURE } from '../src/value/value';
-import * as base from '../src/function/base';
+import base from '../src/function/primitive';
 
 import readline from 'readline';
 
 let machine = new Machine();
-for (let key in base) {
-  let func = base[key];
+for (let func of base) {
   if (func.type !== PROCEDURE) continue;
   machine.rootParameters[func.name] = func;
 }
