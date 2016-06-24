@@ -9,6 +9,8 @@ import { SYMBOL, BOOLEAN, PAIR, CHARACTER } from '../value/value';
 import schemeCode from './primitive.scm';
 import pair from './pair';
 import boolean from './boolean';
+import symbol from './symbol';
+import character from './character';
 
 // Base library - Primitive functions that depend on native calls.
 
@@ -234,5 +236,5 @@ export default [
     return new PairValue();
   }),
   schemeCode,
-  pair, boolean
+  pair, boolean, symbol, character
 ];

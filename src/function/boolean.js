@@ -2,6 +2,8 @@ import NativeProcedureValue from '../value/nativeProcedure';
 import BooleanValue from '../value/boolean';
 import { BOOLEAN } from '../value/value';
 
+import createComparator from './util/createComparator';
+
 export default [
   new NativeProcedureValue('not', list => {
     let val = list.car;
@@ -10,11 +12,5 @@ export default [
   new NativeProcedureValue('boolean?', list => {
     return new BooleanValue(list.car && list.car.type === BOOLEAN);
   }),
-  new NativeProcedureValue('boolean=?', list => {
-    if (!list.car || list.car.type !== BOOLEAN) return new BooleanValue(false);
-    let first = list.car.value;
-    return new BooleanValue(list.every(
-      v => v.type === BOOLEAN && v.value === first
-    ));
-  })
+  createComparator('boolean=?', BOOLEAN, (a, b) => a === b)
 ];
