@@ -84,11 +84,83 @@ export default [
     }
     return output || new PairValue();
   }),
-  new NativeProcedureValue('map', list => {
+  new NativeProcedureValue('map', (list, machine, frame) => {
+    let procedure = list.car;
+    // Assert procedure
+    let argsHeader = new PairValue(procedure);
+    let argsTail = argsHeader;
 
+    if (frame.bufferHead == null) {
+      frame.bufferHead = list.cdr.copy();
+      frame.result = null;
+    }
+    if (frame.result != null) {
+      let pair = new PairValue(frame.result);
+      if (frame.bufferOutputHead == null) {
+        frame.bufferOutputHead = pair;
+        frame.bufferOutputTail = pair;
+      } else {
+        frame.bufferOutputTail.cdr = pair;
+        frame.bufferOutputTail = pair;
+      }
+      frame.result = null;
+    }
+    let headHead = frame.bufferHead;
+    let headNode = null;
+    if (headHead.car != null) {
+      headNode = headHead;
+      // Visit every node, and increment each node.
+      while (headNode != null && headNode.type === PAIR) {
+        if (headNode.car == null || headNode.car.type !== PAIR) {
+          throw new Error('List sizes does not match');
+        }
+        let argsPair = new PairValue(headNode.car.car);
+        argsTail.cdr = argsPair;
+        argsTail = argsPair;
+
+        headNode.car = headNode.car.cdr;
+        headNode = headNode.cdr;
+      }
+
+      // Push the stack frame...
+      machine.pushStack(argsHeader);
+      return undefined;
+    }
+    // Done!
+    return frame.bufferOutputHead;
   }),
-  new NativeProcedureValue('for-each', list => {
+  new NativeProcedureValue('for-each', (list, machine, frame) => {
+    // R6RS standard requires that more than one list should be handled.
+    // This can be implemented kinda absurdly....
+    let procedure = list.car;
+    // Assert procedure
+    let argsHeader = new PairValue(procedure);
+    let argsTail = argsHeader;
 
+    if (frame.bufferHead == null) frame.bufferHead = list.cdr.copy();
+    let headHead = frame.bufferHead;
+    let headNode = null;
+    if (headHead.car != null) {
+      headNode = headHead;
+      // Visit every node, and increment each node.
+      while (headNode != null && headNode.type === PAIR) {
+        if (headNode.car == null || headNode.car.type !== PAIR) {
+          throw new Error('List sizes does not match');
+        }
+        let argsPair = new PairValue(headNode.car.car);
+        argsTail.cdr = argsPair;
+        argsTail = argsPair;
+
+        headNode.car = headNode.car.cdr;
+        headNode = headNode.cdr;
+      }
+
+      // Push the stack frame...
+      machine.pushStack(argsHeader);
+      return undefined;
+    }
+    // Done!
+    return new PairValue();
   }),
   schemeCode
 ];

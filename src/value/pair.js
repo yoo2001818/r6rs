@@ -159,6 +159,30 @@ export default class PairValue {
     }
     return rootNode;
   }
+  // Create deep copy of the list.
+  copy() {
+    let parent, rootNode;
+    let node = this;
+    let n = 0;
+    while (node != null && node.type === PAIR) {
+      if (node.car) {
+        let o = new PairValue(node.car, null);
+        if (parent) {
+          parent.cdr = o;
+          parent = o;
+        } else {
+          parent = o;
+          rootNode = o;
+        }
+      }
+      n ++;
+      node = node.cdr;
+    }
+    if (node != null) {
+      if (parent) parent.cdr = node;
+    }
+    return rootNode || new PairValue();
+  }
   toArray() {
     let output = [];
     let node = this;
