@@ -5,7 +5,7 @@ import RealValue from '../value/number';
 import BooleanValue from '../value/boolean';
 import SymbolValue from '../value/symbol';
 import PairValue from '../value/pair';
-import { CHARACTER, STRING } from '../value/value';
+import { STRING } from '../value/value';
 
 import createComparator from './util/createComparator';
 

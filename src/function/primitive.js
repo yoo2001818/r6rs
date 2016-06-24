@@ -63,12 +63,18 @@ export default [
   }),
   // define-syntax is processed by expander, so machine itself doesn't have to
   // process it at all.
-  new NativeSyntaxValue('define-syntax',
-    () => {
-      // NOP
-      return true;
-    }
-  ),
+  new NativeSyntaxValue('define-syntax', () => {
+    // NOP
+    return true;
+  }),
+  new NativeSyntaxValue('let-syntax', () => {
+    // NOP
+    return true;
+  }),
+  new NativeSyntaxValue('letrec-syntax', () => {
+    // NOP
+    return true;
+  }),
   new NativeSyntaxValue('lambda', (machine, frame) => {
     frame.result = new LambdaValue('_lambda_', frame.expTrack.cdr,
       frame.expTrack.car, frame.scope);
@@ -192,11 +198,29 @@ export default [
     }
     return result;
   }),
+  new NativeProcedureValue('error', list => {
+    let output = 'Error: ';
+    if (list.car && list.car.value !== false) {
+      output += list.car.value + ': ';
+    }
+    output += list.cdr.car.value + ' ';
+    output += list.cdr.cdr.inspect();
+    throw new Error(output);
+  }),
+  new NativeProcedureValue('assertion-violation', list => {
+    let output = 'Assertion violation: ';
+    if (list.car && list.car.value !== false) {
+      output += list.car.value + ': ';
+    }
+    output += list.cdr.car.value + ' ';
+    output += list.cdr.cdr.inspect();
+    throw new Error(output);
+  }),
   new NativeProcedureValue('assert', (list, _, frame) => {
     let val = list.car;
     if (val && val.type === BOOLEAN && val.value === false) {
       // Assert if false
-      throw new Error('Assertion failed: ' + frame.expression.cdr.inspect());
+      throw new Error('Assertion violation: ' + frame.expression.cdr.inspect());
     }
     // Return if true
     return val;

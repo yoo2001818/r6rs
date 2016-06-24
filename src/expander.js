@@ -11,13 +11,38 @@ const transformers = {
   'syntax-rules': code => new SyntaxRules(code)
 };
 
-function unquoteHandler (frame, code, stack) {
+function unquoteHandler(frame, code, stack) {
   // Create new stack, allowing expand requests again
   return new PairValue({
     code,
     scope: frame.scope,
     ignore: false
   }, stack);
+}
+
+function letSyntax(frame, code, stack) {
+  let name = code.cdr.car;
+  if (!name || name.type !== SYMBOL) {
+    throw new Error('let-syntax expects a symbol');
+  }
+  if (stack.scope.car[name.value]) {
+    throw new Error('Syntax ' + name.value + ' conflicts');
+  }
+  let transCode = code.cdr.cdr.car;
+  let transName = transCode.car;
+  if (!transName || transName.type !== SYMBOL) {
+    throw new Error('Transformer name must be a symbol');
+  }
+  let transFunc = transformers[transName.value];
+  if (!transFunc) {
+    throw new Error('Unsupported transformer type');
+  }
+  let transObj = transFunc(transCode);
+  // Apply the transform object to root scope
+  stack.scope.car[name.value] = transObj;
+  // Don't process child nodes
+  frame.result = code;
+  return stack;
 }
 
 const basicKeywords = {
@@ -53,6 +78,8 @@ const basicKeywords = {
     frame.result = code;
     return stack;
   },
+  'let-syntax': letSyntax,
+  'letrec-syntax': letSyntax,
   'quote': (frame, code, stack) => {
     // Don't process child nodes - it shouldn't be processed!
     frame.result = code;
