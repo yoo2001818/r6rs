@@ -11,6 +11,15 @@ const transformers = {
   'syntax-rules': code => new SyntaxRules(code)
 };
 
+function unquoteHandler (frame, code, stack) {
+  // Create new stack, allowing expand requests again
+  return new PairValue({
+    code,
+    scope: frame.scope,
+    ignore: false
+  }, stack);
+}
+
 const basicKeywords = {
   'lambda': (frame, code, stack) => {
     // Create new scope and stack
@@ -43,7 +52,22 @@ const basicKeywords = {
     // Don't process child nodes
     frame.result = code;
     return stack;
-  }
+  },
+  'quote': (frame, code, stack) => {
+    // Don't process child nodes - it shouldn't be processed!
+    frame.result = code;
+    return stack;
+  },
+  'quasiquote': (frame, code, stack) => {
+    // Create new stack, ignoring any expand requests
+    return new PairValue({
+      code,
+      scope: frame.scope,
+      ignore: true
+    }, stack);
+  },
+  'unquote': unquoteHandler,
+  'unquote-splicing': unquoteHandler
 };
 
 function findScope(scope, name) {
@@ -84,7 +108,7 @@ export default function expand(code, rootScope = {}) {
           }
         }
         // Run transform until no transformer is available.
-        while (code.car && code.car.type === SYMBOL) {
+        while (code.car && code.car.type === SYMBOL && !frame.ignore) {
           // Traverse scope information, and find the symbol
           let transformer = findScope(frame.scope, code.car.value);
           if (transformer) {
@@ -99,7 +123,8 @@ export default function expand(code, rootScope = {}) {
           // Create child stack frame.
           stack = new PairValue({
             code,
-            scope: frame.scope
+            scope: frame.scope,
+            ignore: frame.ignore
           }, stack);
         } else {
           // If transformer has transformed the code into other types,

@@ -62,7 +62,7 @@ const SYNTAX_TABLE = [
     }],
     // [/[a-zA-Z!$%&*/:<=>?\^_~+\-]/]
     // peculiar identifier is not implemented yet
-    [/([^\s#()[\]'`0-9;"'.]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*|\.\.\./g,
+    [/([^\s#()[\]'`0-9;"'.,]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*|\.\.\./g,
       (_, v) => ({
         type: IDENTIFIER,
         value: v[0]
@@ -107,8 +107,14 @@ const SYNTAX_TABLE = [
     [/\[/g, () => ({ type: LIST_START, value: SQUARE_BRACKET })],
     [/\)/g, () => ({ type: LIST_END, value: ROUND_BRACKET })],
     [/\]/g, () => ({ type: LIST_END, value: SQUARE_BRACKET })],
+    [/#'/g, () => ({ type: ABBERVIATION, value: SYNTAX })],
+    [/#`/g, () => ({ type: ABBERVIATION, value: QUASISYNTAX })],
+    [/#,@/g, () => ({ type: ABBERVIATION, value: UNSYNTAX_SPLICING })],
+    [/#,/g, () => ({ type: ABBERVIATION, value: UNSYNTAX })],
     [/'/g, () => ({ type: ABBERVIATION, value: QUOTE })],
     [/`/g, () => ({ type: ABBERVIATION, value: QUASIQUOTE })],
+    [/,@/g, () => ({ type: ABBERVIATION, value: UNQUOTE_SPLICING })],
+    [/,/g, () => ({ type: ABBERVIATION, value: UNQUOTE })],
     [/\.(?=(^|[()\[\]";#\s]))/g, () => ({ type: LIST_CON })],
     [/\s+/g, () => undefined]
     // TODO: Implement , ,@ #' #` #, #,@

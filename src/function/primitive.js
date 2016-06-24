@@ -75,6 +75,87 @@ export default [
     frame.result = frame.expTrack.car;
     return true;
   }),
+  new NativeSyntaxValue('quasiquote', (machine, frame) => {
+    if (frame.bufferStack == null) {
+      // Initialize quasiquote traverser
+      frame.bufferStack = new PairValue({
+        input: frame.expTrack.car
+      });
+    }
+    function pushValue(entry, value) {
+      let pair = new PairValue(value);
+      if (entry.outputTail) {
+        entry.outputTail.cdr = pair;
+        entry.outputTail = pair;
+      } else {
+        entry.outputHead = pair;
+        entry.outputTail = pair;
+      }
+    }
+    while (frame.bufferStack != null) {
+      let entry = frame.bufferStack.car;
+      if (entry.input == null) {
+        frame.bufferStack = frame.bufferStack.cdr;
+        if (frame.bufferStack != null) {
+          frame.bufferStack.car.result = entry.outputHead || new PairValue();
+        } else {
+          frame.result = entry.outputHead || new PairValue();
+          return true;
+        }
+      } else if (entry.input.type === PAIR) {
+        if (entry.input.car.type === PAIR) {
+          let subCode = entry.input.car;
+          if (subCode.car.type === SYMBOL && subCode.car.value === 'unquote') {
+            if (frame.result != null) {
+              pushValue(entry, frame.result);
+              frame.result = null;
+            } else {
+              machine.pushStack(subCode.cdr.car);
+              return;
+            }
+          } else if (subCode.car.type === SYMBOL &&
+            subCode.car.value === 'unquote-splicing'
+          ) {
+            if (frame.result != null) {
+              let listNode = frame.result;
+              while (listNode != null && listNode.type === PAIR) {
+                pushValue(entry, listNode.car);
+                listNode = listNode.cdr;
+              }
+              frame.result = null;
+            } else {
+              machine.pushStack(subCode.cdr.car);
+              return;
+            }
+          } else {
+            if (entry.result) {
+              pushValue(entry, entry.result);
+              entry.result = null;
+            } else {
+              frame.bufferStack = new PairValue({
+                input: subCode
+              }, frame.bufferStack);
+              continue;
+            }
+          }
+        } else {
+          pushValue(entry, entry.input.car);
+        }
+        entry.input = entry.input.cdr;
+      } else {
+        // cdr value.
+        if (entry.outputTail) {
+          entry.outputTail.cdr = entry.input;
+        } else {
+          let pair = new PairValue(null, entry.input);
+          entry.outputHead = entry.outputTail = pair;
+        }
+        entry.input = null;
+      }
+    }
+    frame.result = frame.expTrack.car;
+    return true;
+  }),
   new NativeSyntaxValue('if', (machine, frame) => {
     switch (frame.procTrack) {
     case 0:
