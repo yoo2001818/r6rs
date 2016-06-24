@@ -4,13 +4,14 @@ import NativeSyntaxValue from '../value/nativeSyntax';
 import RealValue from '../value/number';
 import BooleanValue from '../value/boolean';
 import PairValue from '../value/pair';
-import { SYMBOL, BOOLEAN, PAIR, CHARACTER } from '../value/value';
+import { SYMBOL, BOOLEAN, PAIR } from '../value/value';
 
 import schemeCode from './primitive.scm';
 import pair from './pair';
 import boolean from './boolean';
 import symbol from './symbol';
 import character from './character';
+import string from './string';
 
 // Base library - Primitive functions that depend on native calls.
 
@@ -200,23 +201,6 @@ export default [
     // Return if true
     return val;
   }),
-  new NativeProcedureValue('symbol?', list => {
-    return list.car && list.car.type === SYMBOL;
-  }),
-  new NativeProcedureValue('char?', list => {
-    return list.car && list.car.type === CHARACTER;
-  }),
-  new NativeProcedureValue('pair?', list => {
-    return list.car && list.car.type === PAIR;
-  }),
-  new NativeProcedureValue('null?', list => {
-    if (list.car == null) return true;
-    if (list.car.type !== PAIR) return false;
-    return list.car.car == null && list.car.cdr == null;
-  }),
-  new NativeProcedureValue('list?', list => {
-    return list.car && list.car.isList();
-  }),
   new NativeProcedureValue('+', list => {
     let sum = 0;
     list.forEach(v => sum += v.value);
@@ -236,5 +220,5 @@ export default [
     return new PairValue();
   }),
   schemeCode,
-  pair, boolean, symbol, character
+  pair, boolean, symbol, character, string
 ];

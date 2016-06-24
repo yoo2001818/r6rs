@@ -62,20 +62,20 @@ const SYNTAX_TABLE = [
     }],
     // [/[a-zA-Z!$%&*/:<=>?\^_~+\-]/]
     // peculiar identifier is not implemented yet
-    [/([^\s#()[\]'`0-9;"'.,]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*|\.\.\./g,
+    [/([^\s#()[\]'`0-9;"'.,]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*|\.\.\./gu,
       (_, v) => ({
         type: IDENTIFIER,
         value: v[0]
       })
     ],
     [new RegExp('#\\\\(x([0-9a-fA-F]+)|nul|alarm|backspace|tab|linefeed' +
-      '|newline|vtab|page|return|esc|space|delete|.)', 'g'
+      '|newline|vtab|page|return|esc|space|delete|.)', 'gu'
     ), (_, v) => ({
       type: CHARACTER,
       value: CHAR_MAPPING[v[1]] || v[1].replace(/x([0-9a-fA-F]+)/g,
-        (match, p1) => String.fromCharCode(parseInt(p1, 16)))
+        (match, p1) => String.fromCodePoint(parseInt(p1, 16)))
     })],
-    [/"(([^\\"]|\\[abtnvfr"\\]|\\\s*\n\s*|\\x([0-9a-fA-F]+))+)"/g, (_, v) => ({
+    [/"(([^\\"]|\\[abtnvfr"\\]|\\\s*\n\s*|\\x([0-9a-fA-F]+))+)"/gu, (_, v) => ({
       type: STRING,
       value: v[1].replace(/\\n/g, '\n')
         .replace(/\\\\/g, '\\')
@@ -89,7 +89,7 @@ const SYNTAX_TABLE = [
         .replace(/\\a/g, '\x07')
         .replace(/\\\s*\n\s*/g, '')
         .replace(/\\x([0-9a-fA-F]+)/g,
-          (match, p1) => String.fromCharCode(parseInt(p1, 16)))
+          (match, p1) => String.fromCodePoint(parseInt(p1, 16)))
     })],
     // [/((#[bBoOdDxX])?(#[iIeE])?|(#[iIeE])?(#[bBoOdDxX])?)?(\+|-)?/],
     // Support only decimals for now...
