@@ -12,7 +12,7 @@ export default [
   new NativeProcedureValue('null?', list => {
     if (list.car == null) return TRUE;
     if (list.car.type !== PAIR) return FALSE;
-    return new BooleanValue(list.car.car == null && list.car.cdr == null);
+    return new BooleanValue(list.car.isEmpty());
   }),
   new NativeProcedureValue('list?', list => {
     return new BooleanValue(list.car && list.car.isList());

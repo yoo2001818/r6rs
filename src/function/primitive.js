@@ -4,7 +4,8 @@ import NativeSyntaxValue from '../value/nativeSyntax';
 import RealValue from '../value/number';
 import BooleanValue from '../value/boolean';
 import PairValue from '../value/pair';
-import { SYMBOL, BOOLEAN, PAIR } from '../value/value';
+import { SYMBOL, BOOLEAN, NUMBER, CHARACTER, PAIR, STRING, PROCEDURE }
+  from '../value/value';
 
 import schemeCode from './primitive.scm';
 import pair from './pair';
@@ -224,6 +225,53 @@ export default [
     }
     // Return if true
     return val;
+  }),
+  new NativeProcedureValue('eqv?', list => {
+    let a = list.car;
+    let b = list.cdr.car;
+    if (a === b) return BooleanValue.TRUE;
+    if (a.type !== b.type) return BooleanValue.FALSE;
+    switch (a.type) {
+    case BOOLEAN:
+    case SYMBOL:
+    case NUMBER:
+    case CHARACTER:
+      return new BooleanValue(a.value === b.value);
+    case PAIR:
+      if (a.isEmpty() && b.isEmpty()) return BooleanValue.TRUE;
+      return new BooleanValue(a === b);
+    default:
+      return new BooleanValue(a === b);
+    }
+  }),
+  (() => {
+    function checkEqual(a, b) {
+      if (a == b) return true;
+      if (a == null || b == null) return false;
+      if (a.type !== b.type) return false;
+      switch (a.type) {
+      case BOOLEAN:
+      case SYMBOL:
+      case NUMBER:
+      case CHARACTER:
+      case STRING:
+        return a.value === b.value;
+      case PAIR:
+        if (!checkEqual(a.car, b.car)) return false;
+        if (!checkEqual(a.cdr, b.cdr)) return false;
+        return true;
+      default:
+        return a === b;
+      }
+    }
+    return new NativeProcedureValue('equal?', list => {
+      let a = list.car;
+      let b = list.cdr.car;
+      return new BooleanValue(checkEqual(a, b));
+    });
+  })(),
+  new NativeProcedureValue('procedure?', list => {
+    return new BooleanValue(list.car && list.car.type === PROCEDURE);
   }),
   new NativeProcedureValue('+', list => {
     let sum = 0;

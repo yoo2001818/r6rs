@@ -42,4 +42,7 @@
       (define var (lambda formal body1 body2 ...)))
   )
 )
+
+(define (eq? a b) (eqv? a b))
+
 ; `;
