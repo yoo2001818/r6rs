@@ -13,6 +13,7 @@ import boolean from './boolean';
 import symbol from './symbol';
 import character from './character';
 import string from './string';
+import number from './number';
 
 // Base library - Primitive functions that depend on native calls.
 
@@ -292,5 +293,5 @@ export default [
     return new PairValue();
   }),
   schemeCode,
-  pair, boolean, symbol, character, string
+  pair, boolean, symbol, character, string, number
 ];

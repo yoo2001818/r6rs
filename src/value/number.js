@@ -6,7 +6,7 @@ export const REAL = Symbol('real');
 export default class RealValue {
   constructor(value) {
     this.type = NUMBER;
-    this.subType = REAL;
+    // this.subType = REAL;
     this.value = value;
   }
   inspect() {
