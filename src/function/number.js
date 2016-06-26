@@ -137,10 +137,22 @@ export default [
   new NativeProcedureValue('number->string', list => {
     // Ignore precision for now
     // Assert number
+    if (list.car.value === Infinity) return new StringValue('inf.0');
+    if (list.car.value === -Infinity) return new StringValue('-inf.0');
+    if (isNaN(list.car.value)) return new StringValue('nan.0');
     return new StringValue((list.car.value).toString(list.cdr.car.value));
   }),
   new NativeProcedureValue('string->number', list => {
     // Assert string and number
+    if (list.car.value === 'inf.0' || list.car.value === '+inf.0') {
+      return new RealValue(Infinity);
+    }
+    if (list.car.value === '-inf.0') {
+      return new RealValue(-Infinity);
+    }
+    if (/^[\-+]?nan.0$/.test(list.car.value)) {
+      return new RealValue(NaN);
+    }
     return new RealValue(parseFloat(list.car.value, list.cdr.car.value));
   }),
   schemeCode

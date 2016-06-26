@@ -64,7 +64,7 @@ const SYNTAX_TABLE = [
     // Support only decimals for now...
     [/((\+|-)?)([0-9]+(\.[0-9]+)?(e-?[0-9]+)?|nan\.0|inf\.0)/g, (_, v) => {
       let value;
-      switch (v.input) {
+      switch (v[0]) {
       case '+inf.0':
       case 'inf.0':
         value = Infinity;
