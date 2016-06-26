@@ -1,8 +1,6 @@
 import Machine from '../src/machine';
-import base from '../src/function/primitive';
 
 let machine = new Machine();
-machine.loadLibrary(base);
 
 machine.evaluate(`
 [+ 1 2 3] ; Adds 1 to 3

@@ -1,10 +1,21 @@
 {
   "name": "tiny-lisp",
   "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "description": "R6RS compliant Scheme interpreter",
+  "keywords": [
+    "scheme",
+    "lisp",
+    "interpreter"
+  ],
+  "homepage": "https://github.com/yoo2001818/tiny-lisp",
+  "bugs": "https://github.com/yoo2001818/tiny-lisp/issues",
+  "main": "./lib/index.js",
+  "bin": {
+    "tiny-lisp": "./lib/repl.js"
+  },
+  "repository": "yoo2001818/tiny-lisp",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/gulp test"
   },
   "author": "Kkiro",
   "license": "MIT",

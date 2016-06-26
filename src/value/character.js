@@ -1,4 +1,4 @@
-import { CHARACTER } from './value';
+import { CHARACTER } from './index';
 
 export default class CharacterValue {
   constructor(value) {

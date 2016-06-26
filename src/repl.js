@@ -1,10 +1,8 @@
 import Machine from '../src/machine';
-import base from '../src/function/primitive';
 
 import readline from 'readline';
 
 let machine = new Machine();
-machine.loadLibrary(base);
 
 const rl = readline.createInterface({
   input: process.stdin,

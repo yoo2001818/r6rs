@@ -5,13 +5,11 @@ import expect from 'expect';
 describe('ProcedureValue', () => {
   describe('#inspect', () => {
     it('should return correct result', () => {
-      expect(new ProcedureValue('nom', PairValue.fromArray([
+      expect(new ProcedureValue('nom', null, PairValue.fromArray([
         'NOM', 'NOM', 'nom'
       ])).inspect()).toBe('#<procedure nom (NOM NOM nom)>');
-      expect(new ProcedureValue('color', new PairValue('red', 'etc')).inspect())
-        .toBe('#<procedure color (red . etc)>');
-      expect(new ProcedureValue('native', 3).inspect())
-        .toBe('#<procedure native (_ _ _)>');
+      expect(new ProcedureValue('color', null, new PairValue('red', 'etc'))
+        .inspect()).toBe('#<procedure color (red . etc)>');
     });
   });
 });

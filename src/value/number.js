@@ -1,4 +1,4 @@
-import { NUMBER } from './value';
+import { NUMBER } from './index';
 
 export const COMPLEX = Symbol('complex');
 export const REAL = Symbol('real');

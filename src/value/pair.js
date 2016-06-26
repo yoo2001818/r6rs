@@ -1,4 +1,4 @@
-import { PAIR } from './value';
+import { PAIR } from './index';
 
 export default class PairValue {
   constructor(car, cdr) {
@@ -30,28 +30,28 @@ export default class PairValue {
     let n = 0;
     let node = this;
     while (node != null && node.type === PAIR) {
-      if (node.car) {
-        callback.call(thisArg, node.car, n, node);
+      if (node.car != null) {
+        callback.call(thisArg, node.car, n, this);
       }
       n ++;
       node = node.cdr;
     }
     if (node != null) {
-      callback.call(thisArg, node, n, null);
+      callback.call(thisArg, node, n, this);
     }
   }
   every(callback, thisArg) {
     let n = 0;
     let node = this;
     while (node != null && node.type === PAIR) {
-      if (node.car) {
-        if (!callback.call(thisArg, node.car, n, node)) return false;
+      if (node.car != null) {
+        if (!callback.call(thisArg, node.car, n, this)) return false;
       }
       n ++;
       node = node.cdr;
     }
     if (node != null) {
-      if (!callback.call(thisArg, node, n, null)) return false;
+      if (!callback.call(thisArg, node, n, this)) return false;
     }
     return true;
   }
@@ -59,14 +59,14 @@ export default class PairValue {
     let n = 0;
     let node = this;
     while (node != null && node.type === PAIR) {
-      if (node.car) {
-        if (callback.call(thisArg, node.car, n, node)) return true;
+      if (node.car != null) {
+        if (callback.call(thisArg, node.car, n, this)) return true;
       }
       n ++;
       node = node.cdr;
     }
     if (node != null) {
-      if (callback.call(thisArg, node, n, null)) return true;
+      if (callback.call(thisArg, node, n, this)) return true;
     }
     return false;
   }
@@ -75,7 +75,7 @@ export default class PairValue {
     let node = this;
     let n = 0;
     while (node != null && node.type === PAIR) {
-      if (node.car && callback.call(thisArg, node.car, n, node)) {
+      if (node.car != null && callback.call(thisArg, node.car, n, this)) {
         let o = new PairValue(node.car, null);
         if (parent) {
           parent.cdr = o;
@@ -89,7 +89,7 @@ export default class PairValue {
       node = node.cdr;
     }
     if (node != null) {
-      if (callback.call(thisArg, node, n, null)) {
+      if (callback.call(thisArg, node, n, this)) {
         if (parent) parent.cdr = node;
       }
     }
@@ -104,7 +104,7 @@ export default class PairValue {
       if (node.car == null) {
         o = new PairValue();
       } else {
-        o = new PairValue(callback.call(thisArg, node.car, n, node), null);
+        o = new PairValue(callback.call(thisArg, node.car, n, this), null);
       }
       if (parent) {
         parent.cdr = o;
@@ -117,7 +117,7 @@ export default class PairValue {
       node = node.cdr;
     }
     if (node != null) {
-      if (parent) parent.cdr = callback.call(thisArg, node, n, null);
+      if (parent) parent.cdr = callback.call(thisArg, node, n, this);
     }
     return rootNode;
   }
@@ -199,13 +199,13 @@ export default class PairValue {
     }
     while (node != null && node.type === PAIR) {
       if (node.car != null) {
-        currentValue = callback(currentValue, node.car, currentIndex, node);
+        currentValue = callback(currentValue, node.car, currentIndex, this);
         currentIndex ++;
       }
       node = node.cdr;
     }
     if (node != null) {
-      currentValue = callback(currentValue, node, currentIndex, null);
+      currentValue = callback(currentValue, node, currentIndex, this);
     }
     return currentValue;
   }

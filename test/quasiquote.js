@@ -1,8 +1,6 @@
 import Machine from '../src/machine';
-import base from '../src/function/primitive';
 
 let machine = new Machine();
-machine.loadLibrary(base);
 
 console.log(machine.evaluate(`
 (define hello 6)

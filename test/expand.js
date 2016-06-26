@@ -3,10 +3,8 @@ import parse from '../src/parser';
 import expand from '../src/expander';
 
 import Machine from '../src/machine';
-import base from '../src/function/primitive';
 
 let machine = new Machine();
-machine.loadLibrary(base);
 
 console.log(machine.evaluate(expand(parse(tokenize(`
 (define-syntax let
