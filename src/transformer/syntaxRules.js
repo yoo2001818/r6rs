@@ -1,4 +1,4 @@
-import { SYMBOL, PAIR } from '../value/value';
+import { SYMBOL, PAIR } from '../value';
 import PairValue from '../value/pair';
 
 const LIST_WRAP = Symbol('listWrap');

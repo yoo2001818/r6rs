@@ -2,7 +2,7 @@ import NativeProcedureValue from '../value/nativeProcedure';
 import RealValue from '../value/number';
 import BooleanValue from '../value/boolean';
 import StringValue from '../value/string';
-import { NUMBER } from '../value/value';
+import { NUMBER } from '../value';
 
 import createComparator from './util/createComparator';
 import schemeCode from './number.scm';

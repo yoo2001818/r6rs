@@ -1,11 +1,10 @@
 import LambdaValue from '../value/lambda';
 import NativeProcedureValue from '../value/nativeProcedure';
 import NativeSyntaxValue from '../value/nativeSyntax';
-import RealValue from '../value/number';
 import BooleanValue from '../value/boolean';
 import PairValue from '../value/pair';
 import { SYMBOL, BOOLEAN, NUMBER, CHARACTER, PAIR, STRING, PROCEDURE }
-  from '../value/value';
+  from '../value';
 
 import schemeCode from './primitive.scm';
 import pair from './pair';
@@ -273,20 +272,6 @@ export default [
   })(),
   new NativeProcedureValue('procedure?', list => {
     return new BooleanValue(list.car && list.car.type === PROCEDURE);
-  }),
-  new NativeProcedureValue('+', list => {
-    let sum = 0;
-    list.forEach(v => sum += v.value);
-    return new RealValue(sum);
-  }),
-  new NativeProcedureValue('-', list => {
-    let sum = list.car.value;
-    list.cdr.forEach(v => sum -= v.value);
-    return new RealValue(sum);
-  }),
-  // Because I hate WCDMA?
-  new NativeProcedureValue('<=', list => {
-    return new BooleanValue(list.car.value <= list.cdr.car.value);
   }),
   new NativeProcedureValue('display', list => {
     console.log(list.car);

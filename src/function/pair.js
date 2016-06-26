@@ -1,7 +1,7 @@
 import NativeProcedureValue from '../value/nativeProcedure';
 import BooleanValue, { TRUE, FALSE } from '../value/boolean';
 import PairValue from '../value/pair';
-import { PAIR } from '../value/value';
+import { PAIR } from '../value';
 
 import schemeCode from './pair.scm';
 

@@ -2,7 +2,7 @@ import NativeProcedureValue from '../value/nativeProcedure';
 import SymbolValue from '../value/symbol';
 import StringValue from '../value/string';
 import BooleanValue from '../value/boolean';
-import { SYMBOL } from '../value/value';
+import { SYMBOL } from '../value';
 
 export default [
   new NativeProcedureValue('symbol?', list => {

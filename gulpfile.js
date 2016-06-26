@@ -30,7 +30,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('babel', function() {
-  return gulp.src(['src/**/*.js'])
+  return gulp.src(['src/**/*.*'])
     .pipe(babel())
     .pipe(gulp.dest('lib'));
 });

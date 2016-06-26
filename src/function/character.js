@@ -2,7 +2,7 @@ import NativeProcedureValue from '../value/nativeProcedure';
 import CharacterValue from '../value/character';
 import RealValue from '../value/number';
 import BooleanValue from '../value/boolean';
-import { CHARACTER } from '../value/value';
+import { CHARACTER } from '../value';
 
 import createComparator from './util/createComparator';
 

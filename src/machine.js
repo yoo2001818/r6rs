@@ -1,5 +1,5 @@
 // A object representing LISP machine.
-import { SYMBOL, PROCEDURE, PAIR } from './value/value';
+import { SYMBOL, PROCEDURE, PAIR } from './value';
 
 import PairValue from './value/pair';
 
@@ -7,8 +7,10 @@ import parse from './parser';
 import tokenize from './tokenizer';
 import expand from './expander';
 
+import base from './function/primitive';
+
 export default class Machine {
-  constructor() {
+  constructor(loadBase = true) {
     // Stores root parameter information - base library, user defined variables
     // etc.
     this.rootParameters = {};
@@ -19,6 +21,7 @@ export default class Machine {
     // in different place.
     this.stack = null;
     this.stackDepth = 0;
+    if (loadBase) this.loadLibrary(base);
   }
   getVariable(name) {
     // Iterate until scope appears...

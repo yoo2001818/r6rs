@@ -1,6 +1,6 @@
 import NativeProcedureValue from '../value/nativeProcedure';
 import BooleanValue from '../value/boolean';
-import { BOOLEAN } from '../value/value';
+import { BOOLEAN } from '../value';
 
 import createComparator from './util/createComparator';
 
