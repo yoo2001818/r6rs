@@ -9,7 +9,7 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-console.log('tiny-lisp REPL');
+console.log('r6rs REPL');
 
 let backlog = '';
 

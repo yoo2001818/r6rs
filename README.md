@@ -1,20 +1,20 @@
-# tiny-lisp
-Tiny Scheme interpreter (Partly R6RS compliant)
+# r6rs
+A Scheme interpreter (Currently partly R6RS compliant)
 
 This program is still work in progress! Use it on your own risk!
 
 # Usage
-`npm install tiny-lisp` will do the trick.
+`npm install r6rs` will do the trick.
 
 ```js
-import { Machine } from 'tiny-lisp';
+import { Machine } from 'r6rs';
 let machine = new Machine();
 console.log(machine.evaluate('(+ 3 3)')); // NumberValue {value: 6}
 ```
 
 ## Manually calling with AST
 ```js
-import { tokenize, parse, Machine } from 'tiny-lisp';
+import { tokenize, parse, Machine } from 'r6rs';
 let machine = new Machine();
 console.log(machine.evaluate(expand(parse(tokenize('(+ 3 3)')), machine.expanderRoot))); // NumberValue {value: 6}
 // Note that you can skip expand phase if you don't want to use macro expansion
@@ -23,7 +23,7 @@ console.log(machine.evaluate(expand(parse(tokenize('(+ 3 3)')), machine.expander
 
 ## Using native functions
 ```js
-import { Machine, NativeProcedureValue, PairValue } from 'tiny-lisp';
+import { Machine, NativeProcedureValue, PairValue } from 'r6rs';
 let machine = new Machine();
 machine.loadLibrary([
   new NativeProcedureValue('alert', list => {

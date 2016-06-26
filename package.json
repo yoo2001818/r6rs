@@ -1,5 +1,5 @@
 {
-  "name": "tiny-lisp",
+  "name": "r6rs",
   "version": "0.1.0",
   "description": "R6RS compliant Scheme interpreter",
   "keywords": [
@@ -7,13 +7,13 @@
     "lisp",
     "interpreter"
   ],
-  "homepage": "https://github.com/yoo2001818/tiny-lisp",
-  "bugs": "https://github.com/yoo2001818/tiny-lisp/issues",
+  "homepage": "https://github.com/yoo2001818/r6rs",
+  "bugs": "https://github.com/yoo2001818/r6rs/issues",
   "main": "./lib/index.js",
   "bin": {
-    "tiny-lisp": "./lib/repl.js"
+    "r6rs": "./lib/repl.js"
   },
-  "repository": "yoo2001818/tiny-lisp",
+  "repository": "yoo2001818/r6rs",
   "scripts": {
     "test": "./node_modules/.bin/gulp test"
   },
