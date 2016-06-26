@@ -34,6 +34,9 @@ machine.loadLibrary([
 console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 ```
 
+## Using REPL
+`npm install r6rs -g` then `r6rs` will do the trick. :)
+
 # Implementation status
 
 ## R6RS specification

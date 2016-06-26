@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import Machine from '../src/machine';
 
 import readline from 'readline';
