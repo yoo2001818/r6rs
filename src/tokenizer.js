@@ -60,6 +60,31 @@ const SYNTAX_TABLE = [
       machine.depth = 0;
       return { type: COMMENT_BLOCK_START };
     }],
+    // [/((#[bBoOdDxX])?(#[iIeE])?|(#[iIeE])?(#[bBoOdDxX])?)?(\+|-)?/],
+    // Support only decimals for now...
+    [/((\+|-)?)([0-9]+(\.[0-9]+)?(e-?[0-9]+)?|nan\.0|inf\.0)/g, (_, v) => {
+      let value;
+      switch (v.input) {
+      case '+inf.0':
+      case 'inf.0':
+        value = Infinity;
+        break;
+      case '-inf.0':
+        value = -Infinity;
+        break;
+      case 'nan.0':
+      case '+nan.0':
+      case '-nan.0':
+        value = NaN;
+        break;
+      default:
+        value = parseFloat(v[0]);
+      }
+      return {
+        type: NUMBER,
+        value
+      };
+    }],
     // [/[a-zA-Z!$%&*/:<=>?\^_~+\-]/]
     // peculiar identifier is not implemented yet
     [/([^\s#()[\]'`0-9;"'.,]|\\x[0-9a-fA-F]+)([^\s#()[\]'`;"'])*|\.\.\./gu,
@@ -90,12 +115,6 @@ const SYNTAX_TABLE = [
         .replace(/\\\s*\n\s*/g, '')
         .replace(/\\x([0-9a-fA-F]+)/g,
           (match, p1) => String.fromCodePoint(parseInt(p1, 16)))
-    })],
-    // [/((#[bBoOdDxX])?(#[iIeE])?|(#[iIeE])?(#[bBoOdDxX])?)?(\+|-)?/],
-    // Support only decimals for now...
-    [/(\+|-)?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?/g, (_, v) => ({
-      type: NUMBER,
-      value: parseFloat(v[0])
     })],
     [/#(t|T|f|F)/g, (_, v) => ({
       type: BOOLEAN,

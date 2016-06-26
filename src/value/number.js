@@ -10,6 +10,9 @@ export default class RealValue {
     this.value = value;
   }
   inspect() {
+    if (isNaN(this.value)) return 'nan.0';
+    if (this.value === Infinity) return 'inf.0';
+    if (this.value === -Infinity) return '-inf.0';
     return this.value;
   }
 }

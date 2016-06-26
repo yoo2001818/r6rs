@@ -58,7 +58,7 @@ console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 - [x] Real (decimal) number
 - [ ] Rational number
 - [x] Integer number
-- [ ] NaN, infinity support
+- [x] NaN, infinity support
 
 ### Library
 - [ ] Library syntax support
