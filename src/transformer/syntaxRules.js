@@ -85,11 +85,18 @@ export default class SyntaxRules {
           }
         }
       } else if (patternCur.car.type === PAIR) {
-        if (codeNode.car.type !== PAIR) return false;
-        let result = this.checkPattern(patternCur.car,
-          codeNode.car, scope,
-          patternEllipsis);
-        if (!result) return false;
+        if (codeNode.car == null) {
+          let result = this.checkPattern(patternCur.car,
+            new PairValue(), scope,
+            patternEllipsis);
+          if (!result) return false;
+        } else {
+          if (codeNode.car.type !== PAIR) return false;
+          let result = this.checkPattern(patternCur.car,
+            codeNode.car, scope,
+            patternEllipsis);
+          if (!result) return false;
+        }
       } else {
         // Nope
         throw new Error('Pattern datum is not supported yet. Please use ' +
