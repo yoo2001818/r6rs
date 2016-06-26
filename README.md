@@ -69,11 +69,11 @@ console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 - [x] lambda, if, set!
 - [ ] cond, case
 - [x] and, or
-- [ ] let, let*, letrec, letrec*, let-values, let*-values (Only let and let* is supported)
+- [ ] `let`, `let*`, `letrec`, `letrec*`, `let-values`, `let*-values` (Only `let` and `let*` is supported)
 - [ ] begin (Not correctly implemented)
 - [x] eqv?, eq?, equal?
-- [x] <type name>?
-- [x] <type name>-><type name> (number->string doesn't support precision yet)
+- [x] `(type name)?`
+- [x] `(type name)->(type name)` (number->string doesn't support precision yet)
 - [ ] Rational number arithmetic operations (numerator, denominator, exact?, ...)
 - [x] Real number arithmetic operations
 - [ ] Complex number arithmetic operations (make-rectangular, ...)
