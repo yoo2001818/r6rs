@@ -4,12 +4,14 @@ import StringValue from '../value/string';
 import BooleanValue from '../value/boolean';
 import { SYMBOL } from '../value';
 
+import assert from '../util/assert';
+
 export default [
   new NativeProcedureValue('symbol?', list => {
     return new BooleanValue(list.car && list.car.type === SYMBOL);
   }),
   new NativeProcedureValue('symbol->string', list => {
-    // Assert symbol
+    assert(list.car, 'symbol');
     return new StringValue(list.car.value);
   }),
   new NativeProcedureValue('symbol=?', list => {
@@ -20,7 +22,7 @@ export default [
     ));
   }),
   new NativeProcedureValue('string->symbol', list => {
-    // Assert string
+    assert(list.car, 'string');
     return new SymbolValue(list.car.value);
   })
 ];

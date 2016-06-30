@@ -20,7 +20,7 @@ export default class PairValue {
     let n = 0;
     let node = this;
     while (node != null && node.type === PAIR) {
-      n ++;
+      if (node.car != null) n ++;
       node = node.cdr;
     }
     if (node != null && cdr) n ++;

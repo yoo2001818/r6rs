@@ -5,6 +5,8 @@ import { PAIR } from '../value';
 
 import schemeCode from './pair.scm';
 
+import assert from '../util/assert';
+
 export default [
   new NativeProcedureValue('pair?', list => {
     return new BooleanValue(list.car && list.car.type === PAIR);
@@ -15,7 +17,8 @@ export default [
     return new BooleanValue(list.car.isEmpty());
   }),
   new NativeProcedureValue('list?', list => {
-    return new BooleanValue(list.car && list.car.isList());
+    return new BooleanValue(list.car && list.car.type === PAIR &&
+      list.car.isList());
   }),
   new NativeProcedureValue('cons', list => {
     return new PairValue(list.car, list.cdr.car);
@@ -32,7 +35,7 @@ export default [
     return list;
   }),
   new NativeProcedureValue('length', list => {
-    // assert pair
+    assert(list.car, 'pair');
     return list.car.length();
   }),
   new NativeProcedureValue('append', list => {
@@ -75,7 +78,7 @@ export default [
     return head || new PairValue();
   }),
   new NativeProcedureValue('reverse', list => {
-    // Assert list
+    assert(list.car, 'pair');
     let output;
     let node = list.car;
     while (node != null && node.type === PAIR) {
@@ -86,7 +89,7 @@ export default [
   }),
   new NativeProcedureValue('map', (list, machine, frame) => {
     let procedure = list.car;
-    // Assert procedure
+    assert(procedure, 'procedure');
     let argsHeader = new PairValue(procedure);
     let argsTail = argsHeader;
 
@@ -133,7 +136,7 @@ export default [
     // R6RS standard requires that more than one list should be handled.
     // This can be implemented kinda absurdly....
     let procedure = list.car;
-    // Assert procedure
+    assert(procedure, 'procedure');
     let argsHeader = new PairValue(procedure);
     let argsTail = argsHeader;
 

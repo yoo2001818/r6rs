@@ -5,6 +5,7 @@ import BooleanValue from '../value/boolean';
 import { CHARACTER } from '../value';
 
 import createComparator from './util/createComparator';
+import assert from '../util/assert';
 
 export default [
   new NativeProcedureValue('char?', list => {
@@ -13,11 +14,11 @@ export default [
   // code point supports UTF-16 surrogate chars, however some browsers may
   // not support it.
   new NativeProcedureValue('char->integer', list => {
-    // Assert char
+    assert(list.car, 'character');
     return new RealValue(list.car.value.codePointAt(0));
   }),
   new NativeProcedureValue('integer->char', list => {
-    // Assert integer
+    assert(list.car, 'number');
     return new CharacterValue(String.fromCodePoint(list.car.value));
   }),
   createComparator('char=?', CHARACTER, (a, b) => a === b),

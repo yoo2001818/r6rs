@@ -7,6 +7,8 @@ import { NUMBER } from '../value';
 import createComparator from './util/createComparator';
 import schemeCode from './number.scm';
 
+import assert from '../util/assert';
+
 function gcd(a, b) {
   if (a < 0) return gcd(-a, b);
   if (b < 0) return gcd(a, -b);
@@ -33,7 +35,7 @@ function createNumberTest(name, test) {
 function createNumberCalc(name, callback, single) {
   return new NativeProcedureValue(name, list => {
     if (list.cdr == null && single) {
-      // Assert number
+      assert(list.car, 'number');
       return new RealValue(single(list.car.value));
     }
     return new RealValue(list.reduce((a, current) => {
@@ -47,14 +49,14 @@ function createNumberCalc(name, callback, single) {
 
 function createNumberOne(name, callback) {
   return new NativeProcedureValue(name, list => {
-    // Assert number
+    assert(list.car, 'number');
     return new RealValue(callback(list.car.value));
   });
 }
 
 function createNumberTwo(name, callback) {
   return new NativeProcedureValue(name, list => {
-    // Assert number
+    assert(list.car, 'number');
     return new RealValue(callback(list.car.value, list.cdr.car.value));
   });
 }
@@ -106,11 +108,11 @@ export default [
   // TODO implement rationalize
   createNumberOne('exp', a => Math.exp(a)),
   new NativeProcedureValue('log', list => {
-    // Assert number
+    assert(list.car, 'number');
     if (list.cdr == null) {
       return new RealValue(Math.log(list.car.value));
     } else {
-      // Assert cdr number
+      assert(list.cdr, 'number');
       return new RealValue(Math.log(list.car.value) /
         Math.log(list.cdr.car.value));
     }
@@ -121,11 +123,11 @@ export default [
   createNumberOne('asin', a => Math.asin(a)),
   createNumberOne('acos', a => Math.acos(a)),
   new NativeProcedureValue('atan', list => {
-    // Assert number
+    assert(list.car, 'number');
     if (list.cdr == null) {
       return new RealValue(Math.atan(list.car.value));
     } else {
-      // Assert cdr number
+      assert(list.cdr, 'number');
       return new RealValue(Math.atan2(list.car.value, list.cdr.car.value));
     }
   }),
@@ -136,14 +138,14 @@ export default [
   // these require complex numbers (which is going to be quite complex :P)
   new NativeProcedureValue('number->string', list => {
     // Ignore precision for now
-    // Assert number
+    assert(list.car, 'number');
     if (list.car.value === Infinity) return new StringValue('inf.0');
     if (list.car.value === -Infinity) return new StringValue('-inf.0');
     if (isNaN(list.car.value)) return new StringValue('nan.0');
     return new StringValue((list.car.value).toString(list.cdr.car.value));
   }),
   new NativeProcedureValue('string->number', list => {
-    // Assert string and number
+    assert(list.car, 'string');
     if (list.car.value === 'inf.0' || list.car.value === '+inf.0') {
       return new RealValue(Infinity);
     }
