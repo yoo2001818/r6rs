@@ -141,6 +141,7 @@ export default function expand(code, rootScope = {}) {
           if (transformer) {
             let original = code;
             code = transformer.exec(original);
+            console.log(code);
             if (original === code) break;
           } else {
             break;

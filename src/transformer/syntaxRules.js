@@ -29,6 +29,11 @@ export default class SyntaxRules {
           scope[patternCur.car.value] = {
             type: LIST_WRAP
           };
+        } else if (patternCur.car.type === PAIR) {
+          // Create empty value (recursion)
+          this.checkPattern(patternCur.car,
+            null, scope,
+            patternEllipsis);
         }
         patternCur = patternNext;
         patternNext = patternNext && patternNext.cdr;
@@ -208,7 +213,7 @@ export default class SyntaxRules {
                   listLoc[current.value] = scopeValue.head;
                 }
                 let listValue = listLoc[current.value];
-                if (listValue === false) {
+                if (listValue === false || listValue == null) {
                   // Underflow.
                   return false;
                 }

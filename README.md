@@ -69,7 +69,7 @@ console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 - [x] lambda, if, set!
 - [ ] cond, case (Only cond is supported)
 - [x] and, or
-- [x] `let`, `let*`, `letrec`, `letrec*`, `let-values`, `let*-values`
+- [ ] `let`, `let*`, `letrec`, `letrec*`, `let-values`, `let*-values` (only `let`, `let*` can be used due to lack of hygiene)
 - [x] begin
 - [x] eqv?, eq?, equal?
 - [x] `(type name)?`
