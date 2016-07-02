@@ -1,7 +1,7 @@
 import ProcedureValue from './procedure';
 import PairValue from './pair';
 
-import { PAIR, SYMBOL } from './index';
+import { PAIR, SYMBOL } from './type';
 
 export default class LambdaValue extends ProcedureValue {
   constructor(name, args, code, scope) {

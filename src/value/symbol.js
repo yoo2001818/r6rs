@@ -1,4 +1,4 @@
-import { SYMBOL } from './index';
+import { SYMBOL } from './type';
 
 export default class SymbolValue {
   constructor(value) {

@@ -1,4 +1,4 @@
-import { PAIR } from './index';
+import { PAIR } from './type';
 
 export default class PairValue {
   constructor(car, cdr) {

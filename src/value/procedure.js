@@ -1,4 +1,4 @@
-import { PAIR, PROCEDURE } from './index';
+import { PAIR, PROCEDURE } from './type';
 
 export default class ProcedureValue {
   constructor(name, code, args, scope) {

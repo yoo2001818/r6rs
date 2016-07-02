@@ -1,4 +1,4 @@
-import { BOOLEAN } from './index';
+import { BOOLEAN } from './type';
 
 export class BooleanValue {
   constructor(value) {

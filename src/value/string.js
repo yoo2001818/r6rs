@@ -1,4 +1,4 @@
-import { STRING } from './index';
+import { STRING } from './type';
 
 export default class StringValue {
   constructor(value) {

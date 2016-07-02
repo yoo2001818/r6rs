@@ -1,4 +1,4 @@
-import { NUMBER } from './index';
+import { NUMBER } from './type';
 
 export const COMPLEX = Symbol('complex');
 export const REAL = Symbol('real');
