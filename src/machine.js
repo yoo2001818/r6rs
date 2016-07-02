@@ -160,6 +160,7 @@ export default class Machine {
     } else {
       ast = code;
     }
+    if (ast == null) return new PairValue();
     if (direct || ast.type !== PAIR) {
       this.pushStack(ast);
       return this.execute();
@@ -167,6 +168,7 @@ export default class Machine {
       // Process one by one....
       let node = ast;
       let result;
+      if (node.car == null) return new PairValue();
       while (node !== null && node.type === PAIR) {
         this.pushStack(node.car);
         result = this.execute();

@@ -100,7 +100,7 @@ const SYNTAX_TABLE = [
       value: CHAR_MAPPING[v[1]] || v[1].replace(/x([0-9a-fA-F]+)/g,
         (match, p1) => String.fromCodePoint(parseInt(p1, 16)))
     })],
-    [/"(([^\\"]|\\[abtnvfr"\\]|\\\s*\n\s*|\\x([0-9a-fA-F]+))+)"/gu, (_, v) => ({
+    [/"(([^\\"]|\\[abtnvfr"\\]|\\\s*\n\s*|\\x([0-9a-fA-F]+))*)"/gu, (_, v) => ({
       type: STRING,
       value: v[1].replace(/\\n/g, '\n')
         .replace(/\\\\/g, '\\')

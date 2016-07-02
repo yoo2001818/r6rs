@@ -140,5 +140,5 @@ export default function parse(tokens) {
   if (stack.length > 1) {
     throw new Error('List is not closed');
   }
-  return stack[0].head;
+  return stack[0].head || new PairValue();
 }
