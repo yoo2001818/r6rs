@@ -67,10 +67,10 @@ console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 - [x] define, define-syntax
 - [x] quote, quasiquote, unquote
 - [x] lambda, if, set!
-- [ ] cond, case
+- [ ] cond, case (Only cond is supported)
 - [x] and, or
-- [ ] `let`, `let*`, `letrec`, `letrec*`, `let-values`, `let*-values` (Only `let` and `let*` is supported)
-- [ ] begin (Not correctly implemented)
+- [x] `let`, `let*`, `letrec`, `letrec*`, `let-values`, `let*-values`
+- [x] begin
 - [x] eqv?, eq?, equal?
 - [x] `(type name)?`
 - [x] `(type name)->(type name)` (number->string doesn't support precision yet)
@@ -85,7 +85,7 @@ console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 - [ ] Vector operations
 - [x] Errors and violations
 - [ ] Control features (no call/cc yet)
-- [ ] Iteration let
+- [x] Iteration let
 - [ ] let-syntax, letrec-syntax (not correctly implemented)
 - [x] syntax-rules (Hygienic use is not supported yet)
 - [ ] identifier-syntax
