@@ -1,11 +1,11 @@
-import NativeProcedureValue from '../value/nativeProcedure';
-import CharacterValue from '../value/character';
-import RealValue from '../value/number';
-import BooleanValue from '../value/boolean';
-import { CHARACTER } from '../value';
+import NativeProcedureValue from '../../value/nativeProcedure';
+import CharacterValue from '../../value/character';
+import RealValue from '../../value/number';
+import BooleanValue from '../../value/boolean';
+import { CHARACTER } from '../../value';
 
-import createComparator from './util/createComparator';
-import assert from '../util/assert';
+import createComparator from '../util/createComparator';
+import assert from '../../util/assert';
 
 export default [
   new NativeProcedureValue('char?', list => {

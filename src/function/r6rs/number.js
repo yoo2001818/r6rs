@@ -1,13 +1,13 @@
-import NativeProcedureValue from '../value/nativeProcedure';
-import RealValue from '../value/number';
-import BooleanValue from '../value/boolean';
-import StringValue from '../value/string';
-import { NUMBER } from '../value';
+import NativeProcedureValue from '../../value/nativeProcedure';
+import RealValue from '../../value/number';
+import BooleanValue from '../../value/boolean';
+import StringValue from '../../value/string';
+import { NUMBER } from '../../value';
 
-import createComparator from './util/createComparator';
+import createComparator from '../util/createComparator';
 import schemeCode from './number.scm';
 
-import assert from '../util/assert';
+import assert from '../../util/assert';
 
 function gcd(a, b) {
   if (a < 0) return gcd(-a, b);

@@ -1,10 +1,10 @@
-import LambdaValue from '../value/lambda';
-import NativeProcedureValue from '../value/nativeProcedure';
-import NativeSyntaxValue from '../value/nativeSyntax';
-import BooleanValue from '../value/boolean';
-import PairValue from '../value/pair';
+import LambdaValue from '../../value/lambda';
+import NativeProcedureValue from '../../value/nativeProcedure';
+import NativeSyntaxValue from '../../value/nativeSyntax';
+import BooleanValue from '../../value/boolean';
+import PairValue from '../../value/pair';
 import { SYMBOL, BOOLEAN, NUMBER, CHARACTER, PAIR, STRING, PROCEDURE }
-  from '../value';
+  from '../../value';
 
 import schemeCode from './primitive.scm';
 import pair from './pair';

@@ -1,10 +1,10 @@
-import NativeProcedureValue from '../value/nativeProcedure';
-import SymbolValue from '../value/symbol';
-import StringValue from '../value/string';
-import BooleanValue from '../value/boolean';
-import { SYMBOL } from '../value';
+import NativeProcedureValue from '../../value/nativeProcedure';
+import SymbolValue from '../../value/symbol';
+import StringValue from '../../value/string';
+import BooleanValue from '../../value/boolean';
+import { SYMBOL } from '../../value';
 
-import assert from '../util/assert';
+import assert from '../../util/assert';
 
 export default [
   new NativeProcedureValue('symbol?', list => {

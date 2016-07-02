@@ -1,15 +1,15 @@
-import NativeProcedureValue from '../value/nativeProcedure';
-import CharacterValue from '../value/character';
-import StringValue from '../value/string';
-import RealValue from '../value/number';
-import BooleanValue from '../value/boolean';
-import SymbolValue from '../value/symbol';
-import PairValue from '../value/pair';
-import { STRING } from '../value';
+import NativeProcedureValue from '../../value/nativeProcedure';
+import CharacterValue from '../../value/character';
+import StringValue from '../../value/string';
+import RealValue from '../../value/number';
+import BooleanValue from '../../value/boolean';
+import SymbolValue from '../../value/symbol';
+import PairValue from '../../value/pair';
+import { STRING } from '../../value';
 
-import assert from '../util/assert';
+import assert from '../../util/assert';
 
-import createComparator from './util/createComparator';
+import createComparator from '../util/createComparator';
 
 function stringToList(string) {
   let head, tail;

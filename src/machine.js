@@ -7,7 +7,7 @@ import parse from './parser';
 import tokenize from './tokenizer';
 import expand from './expander';
 
-import base from './function/primitive';
+import base from './function';
 
 export default class Machine {
   constructor(loadBase = true) {

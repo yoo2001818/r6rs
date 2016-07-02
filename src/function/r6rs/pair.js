@@ -1,11 +1,11 @@
-import NativeProcedureValue from '../value/nativeProcedure';
-import BooleanValue, { TRUE, FALSE } from '../value/boolean';
-import PairValue from '../value/pair';
-import { PAIR } from '../value';
+import NativeProcedureValue from '../../value/nativeProcedure';
+import BooleanValue, { TRUE, FALSE } from '../../value/boolean';
+import PairValue from '../../value/pair';
+import { PAIR } from '../../value';
 
 import schemeCode from './pair.scm';
 
-import assert from '../util/assert';
+import assert from '../../util/assert';
 
 export default [
   new NativeProcedureValue('pair?', list => {

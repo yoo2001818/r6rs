@@ -94,7 +94,26 @@ console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 - [x] Tail call optimization
 
 ## R6RS standard libraries specification
-Nothing is supported yet
+- [x] Unicode operations
+- [ ] Bytevector operations
+- [ ] List utilities
+- [ ] Sorting
+- [ ] Control structures
+- [ ] Records
+- [ ] Exceptions and conditions
+- [ ] ~~I/O~~
+- [ ] ~~File system~~
+- [ ] ~~Command-line access and exit values~~
+- [ ] Arithmetic
+  - [ ] Fixnums
+  - [ ] Flonums
+  - [ ] Exact bitwise arithmetic
+- [ ] syntax-case
+- [ ] Hashtables
+- [ ] Enumerations
+- [ ] eval
+- [ ] Mutable pairs
+- [ ] Mutable strings
 
 ## SRFI
 Nothing is supported yet
