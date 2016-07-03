@@ -1,4 +1,4 @@
-import { PAIR, PROCEDURE } from './type';
+import { PAIR, PROCEDURE, SYMBOL } from './type';
 
 export default class ProcedureValue {
   constructor(name, code, args, scope) {
@@ -17,7 +17,7 @@ export default class ProcedureValue {
   }
   inspect() {
     let argsText;
-    if (this.args && this.args.type === PAIR) {
+    if (this.args && (this.args.type === PAIR || this.args.type === SYMBOL)) {
       // User-defined functions have LISP list as args list
       argsText = this.args.inspect();
     } else {

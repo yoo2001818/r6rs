@@ -17,6 +17,9 @@ export default class LambdaValue extends ProcedureValue {
         frame.scopeTrack = new PairValue({}, procedure.scope);
         frame.expTrack = expression.cdr;
         frame.argsTrack = procedure.args;
+        if (frame.argsTrack.type !== PAIR) {
+          frame.argsList = true;
+        }
         frame.result = null;
       }
       if (frame.result != null) {
@@ -25,12 +28,20 @@ export default class LambdaValue extends ProcedureValue {
         if (frame.argsList) {
           let pairArgs = new PairValue(frame.result, null);
           if (frame.argsTrack.type !== PAIR) {
+            if (frame.argsTrack.type !== SYMBOL) {
+              throw new Error('Symbol expected, ' + frame.argsTrack.inspect() +
+                ' received');
+            }
             scope[frame.argsTrack.value] = pairArgs;
           } else {
             frame.argsTrack.cdr = pairArgs;
           }
           frame.argsTrack = pairArgs;
         } else {
+          if (frame.argsTrack.car.type !== SYMBOL) {
+            throw new Error('Symbol expected, ' + frame.argsTrack.inspect() +
+              ' received');
+          }
           // Normal value; just put it.
           scope[frame.argsTrack.car.value] = frame.result;
           // Advance to next step...
@@ -42,7 +53,9 @@ export default class LambdaValue extends ProcedureValue {
         }
         frame.expTrack = frame.expTrack.cdr;
       }
-      if (frame.argsTrack != null && frame.argsTrack.car != null) {
+      if (frame.argsTrack != null &&
+        (frame.argsTrack.type != PAIR || frame.argsTrack.car != null)
+      ) {
         if (frame.expTrack) {
           // Try to resolve the expression value.
           machine.pushStack(frame.expTrack.car);
@@ -51,12 +64,18 @@ export default class LambdaValue extends ProcedureValue {
           // Data underflow.
           throw new Error('Argument ' + frame.argsTrack.car.inspect() +
             ' is missing');
+        } else if (frame.argsTrack.type !== PAIR) {
+          // if argsTrack is not pair, try to add empty list to it
+          if (frame.argsTrack.type !== SYMBOL) {
+            throw new Error('Symbol expected, ' + frame.argsTrack.inspect() +
+              ' received');
+          }
+          frame.scopeTrack.car[frame.argsTrack.value] = new PairValue();
         }
-      } else {
-        // Finalize scope and start processing.
-        frame.scope = frame.scopeTrack;
-        frame.procTrack = frame.procedure.code;
       }
+      // Finalize scope and start processing.
+      frame.scope = frame.scopeTrack;
+      frame.procTrack = frame.procedure.code;
     }
     // Start executing the code! :P
     let code;
