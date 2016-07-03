@@ -28,8 +28,8 @@ export default [
     return list.car.car;
   }, ['pair']),
   new NativeProcedureValue('cdr', list => {
-    if (list.car.cdr == null) throw new Error('Assertion exception');
-    return list.car.cdr;
+    if (list.car.car == null) throw new Error('Assertion exception');
+    return list.car.cdr || new PairValue();
   }, ['pair']),
   new NativeProcedureValue('list', list => {
     return list;

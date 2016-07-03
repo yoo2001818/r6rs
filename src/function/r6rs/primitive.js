@@ -14,6 +14,8 @@ import character from './character';
 import string from './string';
 import number from './number';
 
+import assert from '../../util/assert';
+
 // Base library - Primitive functions that depend on native calls.
 
 export default [
@@ -223,6 +225,22 @@ export default [
     }
     return result;
   }, null, 'form'),
+  new NativeProcedureValue('apply', (list, machine) => {
+    assert(list.car, PROCEDURE);
+    let listHead = new PairValue(list.car);
+    let listTail = listHead;
+    let node = list.cdr;
+    while (node != null && node.cdr != null) {
+      let pairValue = new PairValue(node.car);
+      listTail.cdr = pairValue;
+      listTail = pairValue;
+      node = node.cdr;
+    }
+    assert(node.car, PAIR);
+    listTail.cdr = node.car;
+    machine.jumpStack(listHead);
+    return true;
+  }, ['proc'], 'args'),
   new NativeProcedureValue('error', list => {
     let output = 'Error: ';
     if (list.car && list.car.value !== false) {
