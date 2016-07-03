@@ -85,4 +85,40 @@
   )
 )
 
+(define (remp proc list)
+  (filter (lambda args (not (apply proc args))) list)
+)
+
+(define (remove obj list) (remp (lambda (x) (equal? obj x)) list))
+(define (remv obj list) (remp (lambda (x) (eqv? obj x)) list))
+(define (remq obj list) (remp (lambda (x) (eq? obj x)) list))
+
+(define (memp proc list)
+  (if (null? list)
+    #f
+    (if (proc (car list))
+      list
+      (memp proc (cdr list))
+    )
+  )
+)
+
+(define (member obj list) (memp (lambda (x) (equal? obj x)) list))
+(define (memv obj list) (memp (lambda (x) (eqv? obj x)) list))
+(define (memq obj list) (memp (lambda (x) (eq? obj x)) list))
+
+(define (assp proc alist)
+  (if (null? alist)
+    #f
+    (if (proc (caar alist))
+      (car alist)
+      (assp proc (cdr alist))
+    )
+  )
+)
+
+(define (assoc obj alist) (assp (lambda (x) (equal? obj x)) alist))
+(define (assv obj alist) (assp (lambda (x) (eqv? obj x)) alist))
+(define (assq obj alist) (assp (lambda (x) (eq? obj x)) alist))
+
 ; `;

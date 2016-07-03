@@ -96,7 +96,7 @@ console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 ## R6RS standard libraries specification
 - [x] Unicode operations
 - [ ] Bytevector operations
-- [ ] List utilities
+- [x] List utilities
 - [ ] Sorting
 - [ ] Control structures
 - [ ] Records
