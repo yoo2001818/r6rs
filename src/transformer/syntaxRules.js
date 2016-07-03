@@ -17,8 +17,8 @@ export default class SyntaxRules {
     let codeLen = code ? code.length(false) : 0;
     let patternCur = pattern;
     let patternNext = pattern.cdr;
-    let patternEllipsis = patternNext && patternNext.car.type === SYMBOL &&
-      patternNext.car.value === '...';
+    let patternEllipsis = patternNext && patternNext.type === PAIR &&
+        patternNext.car.type === SYMBOL && patternNext.car.value === '...';
     let codeNode = code;
     while (patternCur != null && patternCur.type === PAIR) {
       if (codeNode == null && (patternEllipsis || parentEllipsis)) {
@@ -117,8 +117,8 @@ export default class SyntaxRules {
       }
       patternCur = patternNext;
       patternNext = patternNext && patternNext.cdr;
-      patternEllipsis = patternNext && patternNext.car.type === SYMBOL &&
-        patternNext.car.value === '...';
+      patternEllipsis = patternNext && patternNext.type === PAIR &&
+        patternNext.car.type === SYMBOL && patternNext.car.value === '...';
       patternLen --;
     }
     if (codeNode != null && codeNode.type === PAIR) {
@@ -126,6 +126,61 @@ export default class SyntaxRules {
       return false;
     }
     // Check CDR value too
+    // TODO We should merge this with top node
+    if (patternCur != null) {
+      // Underflow
+      if (patternCur.type === SYMBOL) {
+        if (codeNode == null) {
+          // If codeNode is null - it failed (underflow).
+          if (codeNode == null) return false;
+        } else if (patternCur.value === '_') {
+          // This always matches
+        } else if (this.literals.indexOf(patternCur.value) !== -1) {
+          // Literal identifier; check if code also matches.
+          if (codeNode.type !== SYMBOL ||
+            patternCur.value !== codeNode.value
+          ) return false;
+        } else {
+          // Pattern variable...
+          // TODO check confliction
+          if (!parentEllipsis) {
+            // Flat pattern. We can just copy it to the scope
+            scope[patternCur.value] = codeNode;
+          } else {
+            // Ellipsis pattern. We have to store it on the list.
+            let varData = scope[patternCur.value];
+            let pair = new PairValue(codeNode, null);
+            if (varData) {
+              varData.tail.cdr = pair;
+              varData.tail = pair;
+            } else {
+              scope[patternCur.value] = {
+                type: LIST_WRAP,
+                head: pair,
+                tail: pair
+              };
+            }
+          }
+        }
+      } else if (patternCur.type === PAIR) {
+        if (codeNode == null) {
+          let result = this.checkPattern(patternCur,
+            new PairValue(), scope,
+            patternEllipsis);
+          if (!result) return false;
+        } else {
+          if (codeNode.type !== PAIR) return false;
+          let result = this.checkPattern(patternCur,
+            codeNode, scope,
+            patternEllipsis);
+          if (!result) return false;
+        }
+      } else {
+        // Nope
+        throw new Error('Pattern datum is not supported yet. Please use ' +
+          'if (or when) in the template for now!');
+      }
+    }
     return true;
   }
   runTemplate(template, scope, listLoc = {}) {
@@ -161,8 +216,19 @@ export default class SyntaxRules {
     let outputHead, outputTail;
     let cur = template;
     let next = template.cdr;
-    let ellipsis = next && next.car.type === SYMBOL && next.car.value === '...';
+    let ellipsis = next && next.type === PAIR &&
+        next.car.type === SYMBOL && next.car.value === '...';
+    let cdrNode = false;
     function pushOutput(data) {
+      if (cdrNode) {
+        if (outputHead) {
+          outputTail.cdr = data;
+        } else {
+          // This isn't really possible though.
+          outputHead = outputTail = new PairValue(null, data);
+        }
+        return;
+      }
       let pair = new PairValue(data);
       if (outputHead) {
         outputTail.cdr = pair;
@@ -171,8 +237,14 @@ export default class SyntaxRules {
         outputHead = outputTail = pair;
       }
     }
-    while (cur != null && cur.type === PAIR) {
-      let current = cur.car;
+    while (cur != null) {
+      let current;
+      if (cur.type === PAIR) {
+        current = cur.car;
+      } else {
+        current = cur;
+        cdrNode = true;
+      }
       if (current == null) {
         // Null value
         if (ellipsis) throw new Error('Unexpected ellipsis');
@@ -234,7 +306,8 @@ export default class SyntaxRules {
       }
       cur = next;
       next = next && next.cdr;
-      ellipsis = next && next.car.type === SYMBOL && next.car.value === '...';
+      ellipsis = next && next.type === PAIR &&
+        next.car.type === SYMBOL && next.car.value === '...';
     }
     return outputHead || new PairValue();
   }
