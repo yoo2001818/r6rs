@@ -58,6 +58,10 @@ export default class LambdaValue extends ProcedureValue {
       ) {
         if (frame.expTrack) {
           // Try to resolve the expression value.
+          if (frame.noResolve) {
+            frame.result = frame.expTrack.car || new PairValue();
+            return;
+          }
           machine.pushStack(frame.expTrack.car);
           return;
         } else if (!frame.argsList) {

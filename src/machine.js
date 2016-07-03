@@ -45,11 +45,11 @@ export default class Machine {
     }
     throw new Error('Unbound variable: ' + name);
   }
-  jumpStack(list) {
+  jumpStack(list, noResolve) {
     // Performs TCO optimization
     let stackEntry = this.stack.car;
     this.popStack();
-    this.pushStack(list, stackEntry);
+    this.pushStack(list, stackEntry, noResolve);
     stackEntry.tco = true;
   }
   clearStack() {
@@ -60,7 +60,7 @@ export default class Machine {
     this.stack = this.stack.cdr;
     this.stackDepth --;
   }
-  pushStack(list, stackEntry) {
+  pushStack(list, stackEntry, noResolve) {
     let scope;
     if (stackEntry) {
       scope = stackEntry.scope;
@@ -69,7 +69,7 @@ export default class Machine {
     }
     this.stack = new PairValue({
       expression: list,
-      scope
+      scope, noResolve
     }, this.stack);
     this.stackDepth ++;
   }

@@ -189,6 +189,8 @@
 (define-syntax define
   (syntax-rules ()
     ((define var) (define var '()))
+    ((define (var formals ... . formalEnd) body1 body2 ...)
+      (define var (lambda (formals ... . formalEnd) body1 body2 ...)))
     ((define (var formals ...) body1 body2 ...)
       (define var (lambda (formals ...) body1 body2 ...)))
     ((define (var . formal) body1 body2 ...)

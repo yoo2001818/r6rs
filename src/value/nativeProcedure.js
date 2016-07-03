@@ -17,7 +17,7 @@ export default class NativeProcedureValue extends ProcedureValue {
         node.cdr = argsExtra;
       }
     }
-    super('procedure', name, code, argsPair);
+    super('procedure<native>', name, code, argsPair);
   }
   execute(machine, frame) {
     if (frame.procTrack == null) {
@@ -42,6 +42,10 @@ export default class NativeProcedureValue extends ProcedureValue {
       }
       if (frame.expTrack != null) {
         // Try to resolve the expression value.
+        if (frame.noResolve) {
+          frame.result = frame.expTrack.car || new PairValue();
+          return;
+        }
         machine.pushStack(frame.expTrack.car);
         return;
       } else {

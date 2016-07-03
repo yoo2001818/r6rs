@@ -126,7 +126,7 @@ export default [
       }
 
       // Push the stack frame...
-      machine.pushStack(argsHeader);
+      machine.pushStack(argsHeader, null, true);
       return undefined;
     }
     // Done!
@@ -159,7 +159,7 @@ export default [
       }
 
       // Push the stack frame...
-      machine.pushStack(argsHeader);
+      machine.pushStack(argsHeader, null, true);
       return undefined;
     }
     // Done!

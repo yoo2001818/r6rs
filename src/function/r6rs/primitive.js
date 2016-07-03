@@ -238,7 +238,7 @@ export default [
     }
     assert(node.car, PAIR);
     listTail.cdr = node.car;
-    machine.jumpStack(listHead);
+    machine.jumpStack(listHead, true);
     return true;
   }, ['proc'], 'args'),
   new NativeProcedureValue('error', list => {
