@@ -97,8 +97,8 @@ console.log(machine.evaluate('(alert "Hello, world!")')); // ()
 - [x] Unicode operations
 - [ ] Bytevector operations
 - [x] List utilities
-- [ ] Sorting
-- [ ] Control structures
+- [x] Sorting
+- [ ] Control structures (do is not implemented)
 - [ ] Records
 - [ ] Exceptions and conditions
 - [ ] ~~I/O~~

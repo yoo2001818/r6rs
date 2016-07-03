@@ -37,8 +37,8 @@ export default class SyntaxRules {
         }
         patternCur = patternNext;
         patternNext = patternNext && patternNext.cdr;
-        patternEllipsis = patternNext && patternNext.car.type === SYMBOL &&
-          patternNext.car.value === '...';
+        patternEllipsis = patternNext && patternNext.type === PAIR &&
+          patternNext.car.type === SYMBOL && patternNext.car.value === '...';
         patternLen --;
         continue;
       }
@@ -53,8 +53,8 @@ export default class SyntaxRules {
           // This should just be skipped, without triggering code change
           patternCur = patternNext;
           patternNext = patternNext && patternNext.cdr;
-          patternEllipsis = patternNext && patternNext.car.type === SYMBOL &&
-            patternNext.car.value === '...';
+          patternEllipsis = patternNext && patternNext.type === PAIR &&
+            patternNext.car.type === SYMBOL && patternNext.car.value === '...';
           patternLen --;
           continue;
         } else if (codeNode == null) {
@@ -121,10 +121,6 @@ export default class SyntaxRules {
         patternNext.car.type === SYMBOL && patternNext.car.value === '...';
       patternLen --;
     }
-    if (codeNode != null && codeNode.type === PAIR) {
-      // It failed (Overflow)
-      return false;
-    }
     // Check CDR value too
     // TODO We should merge this with top node
     if (patternCur != null) {
@@ -180,6 +176,9 @@ export default class SyntaxRules {
         throw new Error('Pattern datum is not supported yet. Please use ' +
           'if (or when) in the template for now!');
       }
+    } else if (codeNode != null) {
+      // It failed (Overflow)
+      return false;
     }
     return true;
   }

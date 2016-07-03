@@ -74,8 +74,9 @@ export default class Machine {
     this.stackDepth ++;
   }
   execute() {
+    let startStackDepth = this.stackDepth;
     // Loop until the stack ends...
-    while (this.stack != null) {
+    while (this.stackDepth >= startStackDepth && this.stack != null) {
       if (this.stackDepth >= 65536) {
         throw new Error('Stack overflow');
       }
@@ -91,7 +92,7 @@ export default class Machine {
         }
         // Code is complete; Return the value and release stack.
         this.popStack();
-        if (this.stack) {
+        if (this.stackDepth >= startStackDepth && this.stack) {
           // Set the result value of the stack.
           this.stack.car.result = runResult;
           continue;
@@ -149,7 +150,7 @@ export default class Machine {
         result = stackData.result;
         // Code is complete; Return the value and release stack.
         this.popStack();
-        if (this.stack) {
+        if (this.stackDepth >= startStackDepth && this.stack) {
           // Set the result value of the stack.
           this.stack.car.result = result;
           continue;

@@ -1,6 +1,7 @@
 import NativeProcedureValue from '../../value/nativeProcedure';
 import BooleanValue, { TRUE, FALSE } from '../../value/boolean';
 import PairValue from '../../value/pair';
+import NumberValue from '../../value/number';
 import { PAIR } from '../../value';
 
 import schemeCode from './pair.scm';
@@ -36,7 +37,7 @@ export default [
   }, null, 'obj'),
   new NativeProcedureValue('length', list => {
     assert(list.car, 'pair');
-    return list.car.length();
+    return new NumberValue(list.car.length());
   }, ['list']),
   new NativeProcedureValue('append', list => {
     let head, tail;
