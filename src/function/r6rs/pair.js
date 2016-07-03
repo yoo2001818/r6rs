@@ -10,34 +10,34 @@ import assert from '../../util/assert';
 export default [
   new NativeProcedureValue('pair?', list => {
     return new BooleanValue(list.car && list.car.type === PAIR);
-  }),
+  }, ['obj']),
   new NativeProcedureValue('null?', list => {
     if (list.car == null) return TRUE;
     if (list.car.type !== PAIR) return FALSE;
     return new BooleanValue(list.car.isEmpty());
-  }),
+  }, ['obj']),
   new NativeProcedureValue('list?', list => {
     return new BooleanValue(list.car && list.car.type === PAIR &&
       list.car.isList());
-  }),
+  }, ['obj']),
   new NativeProcedureValue('cons', list => {
     return new PairValue(list.car, list.cdr.car);
-  }),
+  }, ['car', 'cdr']),
   new NativeProcedureValue('car', list => {
     if (list.car.car == null) throw new Error('Assertion exception');
     return list.car.car;
-  }),
+  }, ['pair']),
   new NativeProcedureValue('cdr', list => {
     if (list.car.cdr == null) throw new Error('Assertion exception');
     return list.car.cdr;
-  }),
+  }, ['pair']),
   new NativeProcedureValue('list', list => {
     return list;
-  }),
+  }, null, 'obj'),
   new NativeProcedureValue('length', list => {
     assert(list.car, 'pair');
     return list.car.length();
-  }),
+  }, ['list']),
   new NativeProcedureValue('append', list => {
     let head, tail;
     let outerNode = list;
@@ -76,7 +76,7 @@ export default [
       }
     }
     return head || new PairValue();
-  }),
+  }, null, 'obj'),
   new NativeProcedureValue('reverse', list => {
     assert(list.car, 'pair');
     let output;
@@ -86,7 +86,7 @@ export default [
       node = node.cdr;
     }
     return output || new PairValue();
-  }),
+  }, ['list']),
   new NativeProcedureValue('map', (list, machine, frame) => {
     let procedure = list.car;
     assert(procedure, 'procedure');
@@ -131,7 +131,7 @@ export default [
     }
     // Done!
     return frame.bufferOutputHead;
-  }),
+  }, ['proc'], 'list'),
   new NativeProcedureValue('for-each', (list, machine, frame) => {
     // R6RS standard requires that more than one list should be handled.
     // This can be implemented kinda absurdly....
@@ -164,6 +164,6 @@ export default [
     }
     // Done!
     return new PairValue();
-  }),
+  }, ['proc'], 'list'),
   schemeCode
 ];

@@ -12,5 +12,5 @@ export default function createComparator(name, type, comp) {
       first = v.value;
       return result;
     }));
-  });
+  }, null, 'obj');
 }

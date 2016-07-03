@@ -29,7 +29,7 @@ function createNumberTest(name, test) {
   return new NativeProcedureValue(name, list => {
     return new BooleanValue(list.car && list.car.type === NUMBER &&
       test(list.car.value));
-  });
+  }, ['obj']);
 }
 
 function createNumberCalc(name, callback, single) {
@@ -44,21 +44,21 @@ function createNumberCalc(name, callback, single) {
       if (!current || current.type !== NUMBER) return prev;
       return callback(prev, current.value);
     }));
-  });
+  }, null, 'number');
 }
 
 function createNumberOne(name, callback) {
   return new NativeProcedureValue(name, list => {
     assert(list.car, 'number');
     return new RealValue(callback(list.car.value));
-  });
+  }, ['a']);
 }
 
 function createNumberTwo(name, callback) {
   return new NativeProcedureValue(name, list => {
     assert(list.car, 'number');
     return new RealValue(callback(list.car.value, list.cdr.car.value));
-  });
+  }, ['a', 'b']);
 }
 
 export default [
@@ -66,7 +66,7 @@ export default [
   // TODO Complex is not supported yet
   new NativeProcedureValue('complex?', () => {
     return new BooleanValue(true);
-  }),
+  }, []),
   createNumberTest('real?', () => true),
   // Treat all number as rational number, for now.
   createNumberTest('rational?', () => true),
@@ -116,7 +116,7 @@ export default [
       return new RealValue(Math.log(list.car.value) /
         Math.log(list.cdr.car.value));
     }
-  }),
+  }, ['a', 'b']),
   createNumberOne('sin', a => Math.sin(a)),
   createNumberOne('cos', a => Math.cos(a)),
   createNumberOne('tan', a => Math.tan(a)),
@@ -130,7 +130,7 @@ export default [
       assert(list.cdr, 'number');
       return new RealValue(Math.atan2(list.car.value, list.cdr.car.value));
     }
-  }),
+  }, ['a', 'b']),
   createNumberOne('sqrt', a => Math.sqrt(a)),
   // TODO exact-integer-sqrt
   createNumberTwo('expt', (a, b) => Math.pow(a, b)),
@@ -143,7 +143,7 @@ export default [
     if (list.car.value === -Infinity) return new StringValue('-inf.0');
     if (isNaN(list.car.value)) return new StringValue('nan.0');
     return new StringValue((list.car.value).toString(list.cdr.car.value));
-  }),
+  }, ['number']),
   new NativeProcedureValue('string->number', list => {
     assert(list.car, 'string');
     if (list.car.value === 'inf.0' || list.car.value === '+inf.0') {
@@ -156,6 +156,6 @@ export default [
       return new RealValue(NaN);
     }
     return new RealValue(parseFloat(list.car.value, list.cdr.car.value));
-  }),
+  }, ['string']),
   schemeCode
 ];

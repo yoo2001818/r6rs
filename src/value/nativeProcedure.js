@@ -1,9 +1,23 @@
 import ProcedureValue from './procedure';
 import PairValue from './pair';
+import { PAIR } from './type';
 
 export default class NativeProcedureValue extends ProcedureValue {
-  constructor(name, code) {
-    super(name, code);
+  constructor(name, code, args, argsExtra) {
+    let argsPair = null;
+    if (args) argsPair = PairValue.fromArray(args);
+    if (argsExtra != null) {
+      if (argsPair == null) {
+        argsPair = argsExtra;
+      } else {
+        let node = argsPair;
+        while (node != null && node.cdr != null && node.cdr.type === PAIR) {
+          node = node.cdr;
+        }
+        node.cdr = argsExtra;
+      }
+    }
+    super('procedure', name, code, argsPair);
   }
   execute(machine, frame) {
     if (frame.procTrack == null) {

@@ -1,8 +1,9 @@
 import { PAIR, PROCEDURE, SYMBOL } from './type';
 
 export default class ProcedureValue {
-  constructor(name, code, args, scope) {
+  constructor(className, name, code, args, scope) {
     this.type = PROCEDURE;
+    this.className = className;
     this.name = name;
     this.args = args;
     this.code = code;
@@ -16,13 +17,13 @@ export default class ProcedureValue {
       ' function.');
   }
   inspect() {
-    let argsText;
+    let argsText = '';
     if (this.args && (this.args.type === PAIR || this.args.type === SYMBOL)) {
       // User-defined functions have LISP list as args list
       argsText = this.args.inspect();
-    } else {
-      argsText = '';
+    } else if (this.args != null) {
+      argsText = this.args;
     }
-    return '#<procedure ' + this.name + ' ' + argsText + '>';
+    return '#<' + this.className + ' ' + this.name + ' ' + argsText + '>';
   }
 }

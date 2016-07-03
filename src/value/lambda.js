@@ -5,7 +5,7 @@ import { PAIR, SYMBOL } from './type';
 
 export default class LambdaValue extends ProcedureValue {
   constructor(name, args, code, scope) {
-    super(name, args, code, scope);
+    super('procedure', name, args, code, scope);
   }
   execute(machine, frame) {
     if (frame.procTrack == null) {

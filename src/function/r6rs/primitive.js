@@ -37,7 +37,7 @@ export default [
       frame.result = new PairValue();
       return true;
     }
-  }),
+  }, ['variable', 'expression']),
   new NativeSyntaxValue('set!', (machine, frame) => {
     switch (frame.procTrack) {
     case 0:
@@ -72,30 +72,43 @@ export default [
       }
       return true;
     }}
-  }),
+  }, ['variable', 'expression']),
   // define-syntax is processed by expander, so machine itself doesn't have to
   // process it at all.
   new NativeSyntaxValue('define-syntax', () => {
     // NOP
     return true;
-  }),
+  }, ['keyword', 'expression']),
   new NativeSyntaxValue('let-syntax', () => {
     // NOP
     return true;
-  }),
+  }, ['keyword', 'expression']),
   new NativeSyntaxValue('letrec-syntax', () => {
     // NOP
     return true;
-  }),
+  }, ['keyword', 'expression']),
   new NativeSyntaxValue('lambda', (machine, frame) => {
-    frame.result = new LambdaValue('_lambda_', frame.expTrack.cdr,
+    // If parent node is define or set! (at library level), we can pull the
+    // name from previous stack and use that instead.
+    let name = '_lambda_';
+    if (machine.stack.cdr && machine.stack.cdr.car) {
+      let prevStack = machine.stack.cdr.car;
+      if (prevStack.procedure === machine.libraryParameters['define'] ||
+        prevStack.procedure === machine.libraryParameters['set!']
+      ) {
+        if (prevStack.expTrack.car && prevStack.expTrack.car.type === SYMBOL) {
+          name = prevStack.expTrack.car.value;
+        }
+      }
+    }
+    frame.result = new LambdaValue(name, frame.expTrack.cdr,
       frame.expTrack.car, frame.scope);
     return true;
-  }),
+  }, ['formals'], 'body'),
   new NativeSyntaxValue('quote', (machine, frame) => {
     frame.result = frame.expTrack.car;
     return true;
-  }),
+  }, ['datum']),
   new NativeSyntaxValue('quasiquote', (machine, frame) => {
     if (frame.bufferStack == null) {
       // Initialize quasiquote traverser
@@ -176,7 +189,7 @@ export default [
     }
     frame.result = frame.expTrack.car;
     return true;
-  }),
+  }, ['datum']),
   new NativeSyntaxValue('if', (machine, frame) => {
     switch (frame.procTrack) {
     case 0:
@@ -200,7 +213,7 @@ export default [
         }
       }
     }
-  }),
+  }, ['test', 'consequent', 'alternate']),
   new NativeProcedureValue('begin', list => {
     let result = null;
     let node = list;
@@ -209,7 +222,7 @@ export default [
       node = node.cdr;
     }
     return result;
-  }),
+  }, null, 'form'),
   new NativeProcedureValue('error', list => {
     let output = 'Error: ';
     if (list.car && list.car.value !== false) {
@@ -218,7 +231,7 @@ export default [
     output += list.cdr.car.value + ' ';
     output += list.cdr.cdr.inspect();
     throw new Error(output);
-  }),
+  }, ['who', 'message'], 'irritant'),
   new NativeProcedureValue('assertion-violation', list => {
     let output = 'Assertion violation: ';
     if (list.car && list.car.value !== false) {
@@ -227,7 +240,7 @@ export default [
     output += list.cdr.car.value + ' ';
     output += list.cdr.cdr.inspect();
     throw new Error(output);
-  }),
+  }, ['who', 'message'], 'irritant'),
   new NativeProcedureValue('assert', (list, _, frame) => {
     let val = list.car;
     if (val && val.type === BOOLEAN && val.value === false) {
@@ -236,7 +249,7 @@ export default [
     }
     // Return if true
     return val;
-  }),
+  }, ['expression']),
   new NativeProcedureValue('eqv?', list => {
     let a = list.car;
     let b = list.cdr.car;
@@ -254,7 +267,7 @@ export default [
     default:
       return new BooleanValue(a === b);
     }
-  }),
+  }, ['obj1', 'obj2']),
   (() => {
     function checkEqual(a, b) {
       if (a == b) return true;
@@ -279,15 +292,15 @@ export default [
       let a = list.car;
       let b = list.cdr.car;
       return new BooleanValue(checkEqual(a, b));
-    });
+    }, ['obj1', 'obj2']);
   })(),
   new NativeProcedureValue('procedure?', list => {
     return new BooleanValue(list.car && list.car.type === PROCEDURE);
-  }),
+  }, ['obj']),
   new NativeProcedureValue('display', list => {
     console.log(list.car);
     return new PairValue();
-  }),
+  }, ['obj']),
   schemeCode,
   pair, boolean, symbol, character, string, number
 ];

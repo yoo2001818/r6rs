@@ -30,7 +30,7 @@ function stringToList(string) {
 export default [
   new NativeProcedureValue('string?', list => {
     return new BooleanValue(list.car && list.car.type === STRING);
-  }),
+  }, ['obj']),
   new NativeProcedureValue('make-string', list => {
     assert(list.car, 'number');
     assert(list.cdr.car, 'character');
@@ -41,7 +41,7 @@ export default [
       output += char;
     }
     return new StringValue(output);
-  }),
+  }, ['k', 'char']),
   new NativeProcedureValue('string', list => {
     let output = '';
     list.forEach(char => {
@@ -49,17 +49,17 @@ export default [
       output += char.value;
     });
     return new StringValue(output);
-  }),
+  }, null, 'char'),
   new NativeProcedureValue('string-length', list => {
     assert(list.car, 'string');
     return new RealValue(list.car.value.length);
-  }),
+  }, ['string']),
   new NativeProcedureValue('string-ref', list => {
     // Assert string, integer, range
     assert(list.car, 'string');
     assert(list.cdr.car, 'number');
     return new CharacterValue(list.car.value[list.cdr.car.value]);
-  }),
+  }, ['string', 'k']),
   createComparator('string=?', STRING, (a, b) => a === b),
   createComparator('string<?', STRING, (a, b) => a < b),
   createComparator('string>?', STRING, (a, b) => a > b),
@@ -74,7 +74,7 @@ export default [
     let start = list.cdr.car.value;
     let end = list.cdr.cdr.car.value;
     return new StringValue(original.slice(start, end));
-  }),
+  }, ['string', 'start', 'end']),
   new NativeProcedureValue('string-append', list => {
     let output = '';
     list.forEach(string => {
@@ -83,11 +83,11 @@ export default [
       output += string.value;
     });
     return new StringValue(output);
-  }),
+  }, null, 'string'),
   new NativeProcedureValue('string->list', list => {
     assert(list.car, 'string');
     return stringToList(list.car.value);
-  }),
+  }, ['string']),
   new NativeProcedureValue('list->string', list => {
     let output = '';
     assert(list.car, 'pair');
@@ -96,7 +96,7 @@ export default [
       output += char.value;
     });
     return new StringValue(output);
-  }),
+  }, ['list']),
   new NativeProcedureValue('string-for-each', (list, machine, frame) => {
     // All this does is convert the request to for-each request. Easy!
     if (frame.procTrack === 0) {
@@ -110,8 +110,8 @@ export default [
     } else {
       return frame.result;
     }
-  }),
+  }, ['proc'], 'string'),
   new NativeProcedureValue('string-copy', list => {
     return new StringValue(list.car.value);
-  })
+  }, ['string'])
 ];
