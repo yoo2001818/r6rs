@@ -20,6 +20,7 @@ if (process.argv[2]) {
   let backlog = '';
 
   const read = (msg = 'scm> ') => {
+    console.log(machine);
     rl.question(msg, (answer) => {
       try {
         console.log(machine.evaluate(backlog + answer));

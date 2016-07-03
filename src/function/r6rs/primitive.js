@@ -29,7 +29,11 @@ export default [
       machine.pushStack(frame.expTrack.cdr.car);
       break;
     case 1:
-      machine.rootParameters[frame.bufferName.value] = frame.result;
+      if (machine.libraryLevel) {
+        machine.libraryParameters[frame.bufferName.value] = frame.result;
+      } else {
+        machine.rootParameters[frame.bufferName.value] = frame.result;
+      }
       frame.result = new PairValue();
       return true;
     }
@@ -58,6 +62,13 @@ export default [
       }
       if (machine.rootParameters[name] != null) {
         machine.rootParameters[name] = value;
+      }
+      if (machine.libraryParameters[name] != null) {
+        if (machine.libraryLevel) {
+          machine.libraryParameters[name] = value;
+        } else {
+          machine.rootParameters[name] = value;
+        }
       }
       return true;
     }}

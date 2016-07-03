@@ -109,12 +109,12 @@ function findScope(scope, name) {
 }
 
 // Root scope stores the 'define-syntax' status.
-export default function expand(code, rootScope = {}) {
+export default function expand(code, rootScope = {}, upperScope) {
   // Well, we should visit whole node and perform transformation if required.
   // Traverse ALL the node!!
   let stack = new PairValue({
     code: code,
-    scope: new PairValue(rootScope)
+    scope: new PairValue(rootScope, upperScope)
   });
   while (stack != null) {
     let frame = stack.car;
