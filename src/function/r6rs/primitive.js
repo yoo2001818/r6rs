@@ -315,10 +315,6 @@ export default [
   new NativeProcedureValue('procedure?', list => {
     return new BooleanValue(list.car && list.car.type === PROCEDURE);
   }, ['obj']),
-  new NativeProcedureValue('display', list => {
-    console.log(list.car);
-    return new PairValue();
-  }, ['obj']),
   schemeCode,
   pair, boolean, symbol, character, string, number
 ];

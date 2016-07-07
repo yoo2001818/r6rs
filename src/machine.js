@@ -39,6 +39,17 @@ export default class Machine {
     this.stack = null;
     this.stackDepth = 0;
     this.libraryLevel = false;
+
+    // The standard I/O. Only stdout is available at this moment though.
+    // Since ports are not supported yet, the stdout function should be a
+    // function that accepts a string.
+    if (typeof process !== 'undefined') {
+      this.stdout = (str) => process.stdout.write(str);
+    } else {
+      // Fallback to console.log in browsers (Which is awful)
+      this.stdout = (str) => console.log(str);
+    }
+
     if (loadBase) this.loadLibrary(base);
   }
   getVariable(name) {
