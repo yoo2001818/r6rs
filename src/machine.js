@@ -10,17 +10,28 @@ import expand from './expander';
 import base from './function';
 
 export default class Machine {
-  constructor(loadBase = true) {
+  constructor(loadBase = true, libraryCache) {
     // Stores root parameter information - user defined variables, functions,
     // etc.
     this.rootParameters = {};
     // Root syntax information used by the expander.
     this.expanderRoot = {};
 
-    // Stores library parameter information - base library, SRFI, etc.
-    this.libraryParameters = {};
-    // Library root syntax information used by the expander.
-    this.expanderLibrary = {};
+    if (libraryCache != null) {
+      if (libraryCache.parameters == null) {
+        libraryCache.parameters = {};
+      }
+      if (libraryCache.expands == null) {
+        libraryCache.expands = {};
+      }
+      this.libraryParameters = libraryCache.parameters;
+      this.expanderLibrary = libraryCache.expands;
+    } else {
+      // Stores library parameter information - base library, SRFI, etc.
+      this.libraryParameters = {};
+      // Library root syntax information used by the expander.
+      this.expanderLibrary = {};
+    }
 
     // The execute stack. It uses cons (PairValue) to store information.
     // Note that this only stores 'execute' stack; scoped variables are stored
