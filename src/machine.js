@@ -105,7 +105,7 @@ export default class Machine {
     let entry = this.stack;
     while (entry != null) {
       let stackEntry = entry.car;
-      if (stackEntry.expression) {
+      if (stackEntry.expression && stackEntry.expression.car) {
         let name = stackEntry.expression.car;
         if (name.line != null) {
           result.push(name.value + ' (' + name.line + ':' + name.column + ')');
