@@ -40,6 +40,10 @@ export default class Machine {
     this.stackDepth = 0;
     this.libraryLevel = false;
 
+    // The code quota. Code execution will stop after reaching the threshold.
+    // (Used to prevent infinite loop hell)
+    this.quota = 0;
+
     // The standard I/O. Only stdout is available at this moment though.
     // Since ports are not supported yet, the stdout function should be a
     // function that accepts a string.
@@ -97,11 +101,17 @@ export default class Machine {
   }
   execute() {
     let startStackDepth = this.stackDepth;
+    let ops = 0;
     // Loop until the stack ends...
     while (this.stackDepth >= startStackDepth && this.stack != null) {
       if (this.stackDepth >= 65536) {
         throw new Error('Stack overflow');
       }
+      if (this.quota > 0 && ops >= this.quota) {
+        // Quota exceeded
+        throw new Error('Quota exceeded');
+      }
+      ops ++;
       let stackData = this.stack.car;
       let { expression, procedure, result } = stackData;
       if (expression.type !== PAIR) {
