@@ -92,7 +92,7 @@ export default [
   new NativeSyntaxValue('lambda', (machine, frame) => {
     // If parent node is define or set! (at library level), we can pull the
     // name from previous stack and use that instead.
-    let name = '_lambda_';
+    let name = '_lambda_', nameValue;
     if (machine.stack.cdr && machine.stack.cdr.car) {
       let prevStack = machine.stack.cdr.car;
       if (prevStack.procedure === machine.libraryParameters['define'] ||
@@ -100,11 +100,13 @@ export default [
       ) {
         if (prevStack.expTrack.car && prevStack.expTrack.car.type === SYMBOL) {
           name = prevStack.expTrack.car.value;
+          nameValue = prevStack.expTrack.car;
         }
       }
     }
     frame.result = new LambdaValue(name, frame.expTrack.cdr,
       frame.expTrack.car, frame.scope);
+    frame.result.nameVal = nameValue;
     return true;
   }, ['formals'], 'body'),
   new NativeSyntaxValue('quote', (machine, frame) => {

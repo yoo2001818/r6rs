@@ -11,7 +11,7 @@ const LIST = Symbol('list');
 
 const ROOT = Symbol('root');
 
-function createStackEntry(type, bracketType) {
+function createStackEntry(type, bracketType, token) {
   return {
     head: null,
     tail: null,
@@ -19,7 +19,9 @@ function createStackEntry(type, bracketType) {
     bracketType,
     comment: false, // Should next keyword be ignored?
     special: null, // QUOTE, QUASIQUOTE, etc
-    con: 0 // Is . specified? 0 - No, 1 - Yes, it is, 2 - Yes, it did
+    con: 0, // Is . specified? 0 - No, 1 - Yes, it is, 2 - Yes, it did
+    line: token && token.line,
+    column: token && token.column
   };
 }
 
@@ -36,22 +38,31 @@ const wrapSymbols = {
 
 // Wrap the data if special flag is on. COMMENT_IGNORE should be handled
 // differently, though.
-function wrapData(entry, data) {
+function wrapData(entry, data, token) {
   let symbol = wrapSymbols[entry.special];
-  let result = symbol ? (
-    new PairValue(new SymbolValue(symbol), new PairValue(data))
-  ) : data;
+  if (!symbol) return data;
+  let symbolVal = new SymbolValue(symbol);
+  if (token) {
+    symbolVal.line = token.line;
+    symbolVal.column = token.column;
+  }
+  let result = new PairValue(symbolVal, new PairValue(data));
   entry.special = null;
   return result;
 }
 
 // Pushes the data into the stack entry. Note that this doesn't push the data
 // into the stack..
-function pushData(entry, data) {
+function pushData(entry, data, token) {
   if (entry.con === 2) {
-    throw new Error('Finished pair cannot have more values');
+    throw injectError(new Error('Finished pair cannot have more values'),
+      token);
   }
-  let wrappedData = wrapData(entry, data);
+  if (token) {
+    data.line = token.line;
+    data.column = token.column;
+  }
+  let wrappedData = wrapData(entry, data, token);
   if (entry.comment) {
     entry.comment = false;
     return;
@@ -77,6 +88,18 @@ function pushData(entry, data) {
       entry.tail = pair;
     }
   }
+  if (token) {
+    entry.head.line = token.line;
+    entry.head.column = token.column;
+  }
+}
+
+function injectError(error, token) {
+  if (token) {
+    error.line = token.line;
+    error.column = token.column;
+  }
+  return error;
 }
 
 // Accepts tokens produced by tokenizer, performs syntax analysis and
@@ -88,57 +111,63 @@ export default function parse(tokens) {
     let token = tokens[i];
     switch (token.type) {
     case TOKENS.LIST_START:
-      stack.push(createStackEntry(LIST, token.value));
+      stack.push(createStackEntry(LIST, token.value, token));
       break;
     case TOKENS.LIST_END:
       // Finalize the current stack..
       if (stack.length <= 1) {
-        throw new Error('Unexpected list closing paren');
+        throw injectError(new Error('Unexpected list closing paren'), token);
       }
       if (stackEntry.con === 1) {
-        throw new Error('List cannot be closed right after cdr specifier');
+        throw injectError(
+          new Error('List cannot be closed right after cdr specifier'), token);
       }
       if (stackEntry.bracketType !== token.value) {
-        throw new Error('Bracket type does not match');
+        throw injectError(new Error('Bracket type does not match'), token);
       }
       // Pop the stack, and refer parent stack.
       stack.pop();
-      pushData(stack[stack.length - 1], stackEntry.head || new PairValue());
+      pushData(stack[stack.length - 1], stackEntry.head || new PairValue(),
+        stackEntry);
       break;
     case TOKENS.LIST_CON:
       if (stackEntry.con !== 0) {
-        throw new Error('There can be only one cdr specifier in single list');
+        throw injectError(
+          new Error('There can be only one cdr specifier in single list'),
+          token);
       }
       stackEntry.con = 1;
       break;
     case TOKENS.IDENTIFIER:
-      pushData(stackEntry, new SymbolValue(token.value));
+      pushData(stackEntry, new SymbolValue(token.value), token);
       break;
     case TOKENS.STRING:
-      pushData(stackEntry, new StringValue(token.value));
+      pushData(stackEntry, new StringValue(token.value), token);
       break;
     case TOKENS.NUMBER:
-      pushData(stackEntry, new RealValue(token.value));
+      pushData(stackEntry, new RealValue(token.value), token);
       break;
     case TOKENS.BOOLEAN:
-      pushData(stackEntry, new BooleanValue(token.value));
+      pushData(stackEntry, new BooleanValue(token.value), token);
       break;
     case TOKENS.CHARACTER:
-      pushData(stackEntry, new CharacterValue(token.value));
+      pushData(stackEntry, new CharacterValue(token.value), token);
       break;
     case TOKENS.COMMENT_IGNORE:
       stackEntry.comment = true;
       break;
     case TOKENS.ABBERVIATION:
       if (stackEntry.special !== null) {
-        throw new Error('Abberviation should not come twice');
+        throw injectError(new Error('Abberviation should not come twice'),
+          token);
       }
       stackEntry.special = token.value;
       break;
     }
   }
   if (stack.length > 1) {
-    throw new Error('List is not closed');
+    throw injectError(new Error('List is not closed'),
+      tokens[tokens.length - 1]);
   }
   return stack[0].head || new PairValue();
 }

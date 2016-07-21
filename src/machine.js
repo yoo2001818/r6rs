@@ -99,6 +99,30 @@ export default class Machine {
     }, this.stack);
     this.stackDepth ++;
   }
+  // Returns the stacktrace if the machine has abnormally exit.
+  getStackTrace(fancy = false) {
+    let result = [];
+    let entry = this.stack;
+    while (entry != null) {
+      let stackEntry = entry.car;
+      if (stackEntry.expression) {
+        let name = stackEntry.expression.car;
+        if (name.line != null) {
+          result.push(name.value + ' (' + name.line + ':' + name.column + ')');
+        } else {
+          result.push(name.value);
+        }
+      } else {
+        // ???
+        result.push('<unknown>');
+      }
+      entry = entry.cdr;
+    }
+    if (fancy) {
+      return result.map(v => '    at ' + v).join('\n');
+    }
+    return result.join('\n');
+  }
   execute() {
     let startStackDepth = this.stackDepth;
     let ops = 0;

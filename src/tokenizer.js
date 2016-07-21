@@ -155,6 +155,16 @@ const SYNTAX_TABLE = [
 ];
 
 export default function tokenize(code) {
+  // Memorize line break position
+  let lineBreaks = [], result, lineBreakRegex = /\n|\r/g;
+  // This is awful???
+  result = lineBreakRegex.exec(code);
+  while (result != null) {
+    lineBreaks.push(result.index);
+    result = lineBreakRegex.exec(code);
+  }
+  let line = 1;
+  let lineStart = 0;
   let machine = {
     state: 0
   };
@@ -175,12 +185,30 @@ export default function tokenize(code) {
     }
     // results.sort((a, b) => a[0].length - b[0].length);
     if (results.length === 0) {
-      throw new Error('Tokenizer failed');
+      let sliced = code.slice(index);
+      let pos = sliced.search(/\s/);
+      if (pos === -1) pos = sliced.length;
+      while (index > lineBreaks[0]) {
+        lineStart = lineBreaks.shift();
+        line += 1;
+      }
+      let error = new Error('Unknown token ' +
+        sliced.slice(0, pos));
+      error.line = line;
+      error.column = index - lineStart + 1;
+      throw error;
     }
     let next = false;
     for (let i = 0; i < results.length; ++i) {
       let result = results[i][1](machine, results[i][0]);
       if (result !== undefined) {
+        // Inject token position...
+        while (index > lineBreaks[0]) {
+          lineStart = lineBreaks.shift();
+          line += 1;
+        }
+        result.line = line;
+        result.column = index - lineStart + 1;
         output.push(result);
         index = results[i][0][0].length + index;
         next = true;

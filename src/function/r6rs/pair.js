@@ -25,11 +25,15 @@ export default [
     return new PairValue(list.car, list.cdr.car);
   }, ['car', 'cdr']),
   new NativeProcedureValue('car', list => {
-    if (list.car.car == null) throw new Error('Assertion exception');
+    if (list.car.car == null) {
+      throw new Error('Empty pair or non-pair received');
+    }
     return list.car.car;
   }, ['pair']),
   new NativeProcedureValue('cdr', list => {
-    if (list.car.car == null) throw new Error('Assertion exception');
+    if (list.car.car == null) {
+      throw new Error('Empty pair or non-pair received');
+    }
     return list.car.cdr || new PairValue();
   }, ['pair']),
   new NativeProcedureValue('list', list => {
