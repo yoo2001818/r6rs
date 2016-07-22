@@ -1,7 +1,7 @@
 import { NUMBER } from './type';
 
-export const COMPLEX = Symbol('complex');
-export const REAL = Symbol('real');
+export const COMPLEX = 'complex';
+export const REAL = 'real';
 
 export default class RealValue {
   constructor(value) {
