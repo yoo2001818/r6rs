@@ -1,6 +1,6 @@
 {
   "name": "r6rs",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "R6RS compliant Scheme interpreter",
   "keywords": [
     "scheme",

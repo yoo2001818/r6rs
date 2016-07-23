@@ -98,6 +98,11 @@ export default [
     let argsHeader = new PairValue(procedure);
     let argsTail = argsHeader;
 
+    // Return empty list
+    if (list.cdr && list.cdr.car && list.cdr.car.car == null) {
+      return new PairValue();
+    }
+
     if (frame.bufferHead == null) {
       frame.bufferHead = list.cdr.copy();
       frame.result = null;
@@ -144,6 +149,10 @@ export default [
     assert(procedure, 'procedure');
     let argsHeader = new PairValue(procedure);
     let argsTail = argsHeader;
+    // Return empty list
+    if (list.cdr && list.cdr.car && list.cdr.car.car == null) {
+      return new PairValue();
+    }
 
     if (frame.bufferHead == null) frame.bufferHead = list.cdr.copy();
     let headHead = frame.bufferHead;
