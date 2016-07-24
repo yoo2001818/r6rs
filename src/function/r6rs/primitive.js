@@ -74,7 +74,7 @@ export default [
       }
       return true;
     }}
-  }, ['variable', 'expression']),
+  }, ['variable', 'expression'], undefined, true),
   // define-syntax is processed by expander, so machine itself doesn't have to
   // process it at all.
   new NativeSyntaxValue('define-syntax', () => {

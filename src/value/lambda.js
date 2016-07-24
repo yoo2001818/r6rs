@@ -4,8 +4,9 @@ import PairValue from './pair';
 import { PAIR, SYMBOL } from './type';
 
 export default class LambdaValue extends ProcedureValue {
-  constructor(name, args, code, scope) {
-    super('procedure', name, args, code, scope);
+  constructor(name, code, args, scope) {
+    // Lambda procedure can't be mutable by itself
+    super('procedure', name, code, args, scope, false);
   }
   execute(machine, frame) {
     if (frame.procTrack == null) {

@@ -3,7 +3,7 @@ import PairValue from './pair';
 import { PAIR } from './type';
 
 export default class NativeSyntaxValue extends ProcedureValue {
-  constructor(name, code, args, argsExtra) {
+  constructor(name, code, args, argsExtra, mutable = false) {
     let argsPair = null;
     if (args) argsPair = PairValue.fromArray(args);
     if (argsExtra != null) {
@@ -17,7 +17,7 @@ export default class NativeSyntaxValue extends ProcedureValue {
         node.cdr = argsExtra;
       }
     }
-    super('syntax', name, code, argsPair);
+    super('syntax', name, code, argsPair, undefined, mutable);
   }
   execute(machine, frame) {
     // Completely skip the arguments checking code.

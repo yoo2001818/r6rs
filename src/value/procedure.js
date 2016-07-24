@@ -1,13 +1,14 @@
 import { PAIR, PROCEDURE, SYMBOL } from './type';
 
 export default class ProcedureValue {
-  constructor(className, name, code, args, scope) {
+  constructor(className, name, code, args, scope, mutable) {
     this.type = PROCEDURE;
     this.className = className;
     this.name = name;
     this.args = args;
     this.code = code;
     this.scope = scope;
+    this.mutable = mutable;
   }
   isNative() {
     return typeof this.code === 'function';

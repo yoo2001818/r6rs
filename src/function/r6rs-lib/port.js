@@ -17,10 +17,10 @@ export default [
     }
     machine.stdout(list.car.value);
     return BooleanValue.TRUE;
-  }, ['char']),
+  }, ['char'], undefined, 'io'),
   new NativeProcedureValue('write', (list, machine) => {
     machine.stdout(list.car.inspect().toString());
     return BooleanValue.TRUE;
-  }, ['obj']),
+  }, ['obj'], undefined, 'io'),
   schemeCode
 ];

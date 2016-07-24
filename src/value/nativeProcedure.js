@@ -3,7 +3,7 @@ import PairValue from './pair';
 import { PAIR } from './type';
 
 export default class NativeProcedureValue extends ProcedureValue {
-  constructor(name, code, args, argsExtra) {
+  constructor(name, code, args, argsExtra, mutable = false) {
     let argsPair = null;
     if (args) argsPair = PairValue.fromArray(args);
     if (argsExtra != null) {
@@ -17,7 +17,7 @@ export default class NativeProcedureValue extends ProcedureValue {
         node.cdr = argsExtra;
       }
     }
-    super('procedure<native>', name, code, argsPair);
+    super('procedure<native>', name, code, argsPair, undefined, mutable);
   }
   execute(machine, frame) {
     if (frame.procTrack == null) {
