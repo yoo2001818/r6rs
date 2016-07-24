@@ -39,7 +39,7 @@ export default [
       frame.result = new PairValue();
       return true;
     }
-  }, ['variable', 'expression']),
+  }, ['variable', 'expression'], undefined, true),
   new NativeSyntaxValue('set!', (machine, frame) => {
     switch (frame.procTrack) {
     case 0:

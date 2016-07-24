@@ -123,7 +123,11 @@ export default class Machine {
     }
     return result.join('\n');
   }
-  execute() {
+  // Stack data is passed to dryRun if mutable function is encountered;
+  // Returning 'true' in that function will stop the execution, thus preventing
+  // mutation.
+  // Returning 'false' will continue the code normally.
+  execute(dryRun = false) {
     let startStackDepth = this.stackDepth;
     let ops = 0;
     // Loop until the stack ends...
@@ -197,6 +201,9 @@ export default class Machine {
           throw new Error('Procedure expected, got ' + procedure.inspect() +
             ' instead');
         }
+        // If in a dry-run mode, we have to check the validity.
+        if (dryRun !== false && procedure.mutable !== false &&
+          dryRun(expression, procedure, stackData)) return true;
       }
       // We've got the procedure - Let's pass the whole stack frame to
       // the procedure!
@@ -222,7 +229,7 @@ export default class Machine {
   // thus preventing separation.
   // Library level means the evaluation is running in the library level, thus
   // it should define variables in library scope.
-  evaluate(code, direct = false, libraryLevel = false) {
+  evaluate(code, direct = false, libraryLevel = false, dryRun = false) {
     let ast;
     if (typeof code === 'string') {
       if (libraryLevel) {
@@ -238,7 +245,7 @@ export default class Machine {
     this.libraryLevel = libraryLevel;
     if (direct || ast.type !== PAIR) {
       this.pushStack(ast);
-      return this.execute();
+      return this.execute(dryRun);
     } else {
       // Process one by one....
       let node = ast;
@@ -246,13 +253,15 @@ export default class Machine {
       if (node.car == null) return new PairValue();
       while (node !== null && node.type === PAIR) {
         this.pushStack(node.car);
-        result = this.execute();
+        result = this.execute(dryRun);
+        if (dryRun && result === true) return true;
         node = node.cdr;
       }
       // Should we process cdr value too?
       if (node !== null) {
         this.pushStack(node);
-        result = this.execute();
+        result = this.execute(dryRun);
+        if (dryRun && result === true) return true;
       }
       return result;
     }
