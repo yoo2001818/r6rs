@@ -19,12 +19,15 @@ export default class NativeSyntaxValue extends ProcedureValue {
     }
     super('syntax', name, code, argsPair, undefined, mutable);
   }
-  execute(machine, frame) {
+  execute(machine, frame, dryRun) {
     // Completely skip the arguments checking code.
     if (frame.procTrack == null) {
       frame.procTrack = 0;
       frame.expTrack = frame.expression.cdr;
     }
+    // If in a dry-run mode, we have to check the validity.
+    if (dryRun !== false && frame.procedure.mutable !== false &&
+      dryRun(frame.expression, frame.procedure, frame)) return 'dryRun';
     // Start executing the code! :P
     let result = frame.procedure.code(machine, frame);
     frame.procTrack += 1;

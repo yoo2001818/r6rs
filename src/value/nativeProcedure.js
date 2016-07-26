@@ -19,7 +19,7 @@ export default class NativeProcedureValue extends ProcedureValue {
     }
     super('procedure<native>', name, code, argsPair, undefined, mutable);
   }
-  execute(machine, frame) {
+  execute(machine, frame, dryRun) {
     if (frame.procTrack == null) {
       // Put everything to the list... And no, we don't need scope
       if (frame.list == null) {
@@ -51,6 +51,9 @@ export default class NativeProcedureValue extends ProcedureValue {
       } else {
         // Start processing.
         frame.procTrack = 0;
+        // If in a dry-run mode, we have to check the validity.
+        if (dryRun !== false && frame.procedure.mutable !== false &&
+          dryRun(frame.expression, frame.procedure, frame)) return 'dryRun';
       }
     }
     // Start executing the code! :P

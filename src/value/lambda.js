@@ -8,7 +8,7 @@ export default class LambdaValue extends ProcedureValue {
     // Lambda procedure can't be mutable by itself
     super('procedure', name, code, args, scope, false);
   }
-  execute(machine, frame) {
+  execute(machine, frame, dryRun) {
     if (frame.procTrack == null) {
       // Create scope and put variables into it, if it isn't specified.
       if (frame.scopeTrack == null) {
@@ -81,6 +81,9 @@ export default class LambdaValue extends ProcedureValue {
       // Finalize scope and start processing.
       frame.scope = frame.scopeTrack;
       frame.procTrack = frame.procedure.code;
+      // If in a dry-run mode, we have to check the validity.
+      if (dryRun !== false && frame.procedure.mutable !== false &&
+        dryRun(frame.expression, frame.procedure, frame)) return 'dryRun';
     }
     // Start executing the code! :P
     let code;

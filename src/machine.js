@@ -201,13 +201,11 @@ export default class Machine {
           throw new Error('Procedure expected, got ' + procedure.inspect() +
             ' instead');
         }
-        // If in a dry-run mode, we have to check the validity.
-        if (dryRun !== false && procedure.mutable !== false &&
-          dryRun(expression, procedure, stackData)) return true;
       }
       // We've got the procedure - Let's pass the whole stack frame to
       // the procedure!
-      let runResult = procedure.execute(this, stackData);
+      let runResult = procedure.execute(this, stackData, dryRun);
+      if (runResult === 'dryRun') return true;
       // True indicates that the executing is over.
       if (runResult === true && !stackData.tco) {
         result = stackData.result;
