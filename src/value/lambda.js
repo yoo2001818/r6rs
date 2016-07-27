@@ -84,6 +84,7 @@ export default class LambdaValue extends ProcedureValue {
       // If in a dry-run mode, we have to check the validity.
       if (dryRun !== false && frame.procedure.mutable !== false &&
         dryRun(frame.expression, frame.procedure, frame)) return 'dryRun';
+      if (frame.stop) return true;
     }
     // Start executing the code! :P
     let code;
