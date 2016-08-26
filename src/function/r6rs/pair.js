@@ -49,6 +49,7 @@ export default [
     while (outerNode != null && outerNode.type === PAIR) {
       let node = outerNode.car;
       outerNode = outerNode.cdr;
+      if (node.type === PAIR && node.car == null) continue;
       while (node != null && node.type === PAIR) {
         let o = new PairValue(node.car, null);
         if (tail) {
